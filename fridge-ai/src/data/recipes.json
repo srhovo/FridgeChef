@@ -1,0 +1,307 @@
+[
+  {
+    "id": "tomato-egg",
+    "name": "番茄炒蛋",
+    "category": "家常菜",
+    "ingredients": ["鸡蛋", "番茄"],
+    "steps": [
+      "鸡蛋打入碗中，加少许盐打散",
+      "番茄洗净切块备用",
+      "热锅凉油，倒入蛋液炒散盛出",
+      "锅中留底油，下番茄炒出汁",
+      "倒入炒好的鸡蛋，翻炒均匀即可出锅"
+    ],
+    "time": 15,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1xxx"
+  },
+  {
+    "id": "egg-fried-rice",
+    "name": "蛋炒饭",
+    "category": "主食",
+    "ingredients": ["鸡蛋", "米饭"],
+    "steps": [
+      "鸡蛋打散，加少许盐",
+      "热锅倒油，倒入蛋液快速炒散",
+      "加入隔夜米饭，用铲子压散翻炒均匀",
+      "调入适量盐和葱花，炒匀出锅"
+    ],
+    "time": 10,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1yyy"
+  },
+  {
+    "id": "tomato-egg-noodles",
+    "name": "番茄鸡蛋面",
+    "category": "面食",
+    "ingredients": ["鸡蛋", "番茄", "面条"],
+    "steps": [
+      "鸡蛋打散，番茄切块",
+      "先炒鸡蛋至凝固盛出",
+      "炒番茄出汁后加水烧开",
+      "放入面条煮熟，倒入鸡蛋拌匀",
+      "加盐调味即可"
+    ],
+    "time": 20,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1zzz"
+  },
+  {
+    "id": "beef-potato",
+    "name": "土豆炖牛肉",
+    "category": "家常菜",
+    "ingredients": ["牛肉", "土豆", "洋葱"],
+    "steps": [
+      "牛肉切块焯水备用",
+      "土豆、洋葱切块",
+      "锅中炒香洋葱，加入牛肉翻炒",
+      "加水没过牛肉，炖煮40分钟",
+      "加入土豆继续炖至软烂，调味出锅"
+    ],
+    "time": 60,
+    "difficulty": "中等",
+    "sourceUrl": "https://www.bilibili.com/video/BV1aaa"
+  },
+  {
+    "id": "pork-pepper",
+    "name": "青椒炒肉",
+    "category": "家常菜",
+    "ingredients": ["猪肉", "青椒"],
+    "steps": [
+      "猪肉切丝，加生抽、淀粉腌制10分钟",
+      "青椒切丝备用",
+      "热锅滑油，下肉丝炒至变色盛出",
+      "炒青椒至断生，倒入肉丝翻炒",
+      "调入盐、生抽，炒匀出锅"
+    ],
+    "time": 20,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1bbb"
+  },
+  {
+    "id": "chicken-fried-rice",
+    "name": "鸡肉炒饭",
+    "category": "主食",
+    "ingredients": ["鸡肉", "米饭", "鸡蛋"],
+    "steps": [
+      "鸡肉切丁，用少许料酒和盐腌制",
+      "鸡蛋打散炒熟盛出",
+      "锅中炒鸡肉至变色",
+      "加入米饭和鸡蛋一起翻炒",
+      "加盐和胡椒粉调味出锅"
+    ],
+    "time": 20,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1ccc"
+  },
+  {
+    "id": "pork-cabbage",
+    "name": "白菜炒肉",
+    "category": "家常菜",
+    "ingredients": ["猪肉", "白菜"],
+    "steps": [
+      "猪肉切片，白菜洗净切片",
+      "热锅下肉片煸炒出油",
+      "加入白菜大火翻炒至变软",
+      "调入盐和少许生抽，炒匀即可"
+    ],
+    "time": 15,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1ddd"
+  },
+  {
+    "id": "bacon-egg",
+    "name": "培根煎蛋",
+    "category": "早餐",
+    "ingredients": ["培根", "鸡蛋"],
+    "steps": [
+      "平底锅不放油，小火煎培根至两面金黄",
+      "用培根煎出的油煎鸡蛋",
+      "煎至喜欢的熟度即可出锅"
+    ],
+    "time": 10,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1eee"
+  },
+  {
+    "id": "milk-toast",
+    "name": "牛奶吐司",
+    "category": "早餐",
+    "ingredients": ["牛奶", "吐司"],
+    "steps": [
+      "牛奶倒入碗中，可加少许糖",
+      "吐司切小块浸泡牛奶",
+      "平底锅小火煎至两面金黄即可"
+    ],
+    "time": 10,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1fff"
+  },
+  {
+    "id": "cheese-sandwich",
+    "name": "奶酪三明治",
+    "category": "早餐",
+    "ingredients": ["奶酪", "吐司"],
+    "steps": [
+      "吐司片上放奶酪",
+      "再盖上一片吐司",
+      "用平底锅小火煎至奶酪融化",
+      "对角切开即可享用"
+    ],
+    "time": 8,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1ggg"
+  },
+  {
+    "id": "pork-potato",
+    "name": "土豆炒肉",
+    "category": "家常菜",
+    "ingredients": ["猪肉", "土豆"],
+    "steps": [
+      "土豆去皮切片，泡水去淀粉",
+      "猪肉切片备用",
+      "先炒土豆片至微黄盛出",
+      "再炒肉片，倒入土豆片一起翻炒",
+      "加盐和生抽调味出锅"
+    ],
+    "time": 25,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1hhh"
+  },
+  {
+    "id": "beef-tomato-rice",
+    "name": "番茄牛肉盖饭",
+    "category": "主食",
+    "ingredients": ["牛肉", "番茄", "米饭", "洋葱"],
+    "steps": [
+      "牛肉切片，番茄、洋葱切块",
+      "炒香洋葱，加入牛肉翻炒",
+      "放入番茄炒出汁，小火炖20分钟",
+      "收汁后浇在米饭上即可"
+    ],
+    "time": 30,
+    "difficulty": "中等",
+    "sourceUrl": "https://www.bilibili.com/video/BV1iii"
+  },
+  {
+    "id": "chicken-noodles",
+    "name": "鸡肉面条",
+    "category": "面食",
+    "ingredients": ["鸡肉", "面条", "白菜"],
+    "steps": [
+      "鸡肉切丝，加少许淀粉腌制",
+      "锅中加水烧开，放入面条",
+      "面条快熟时加入鸡肉和白菜",
+      "煮熟后加盐和香油调味"
+    ],
+    "time": 20,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1jjj"
+  },
+  {
+    "id": "sausage-fried-rice",
+    "name": "香肠炒饭",
+    "category": "主食",
+    "ingredients": ["香肠", "米饭", "鸡蛋"],
+    "steps": [
+      "香肠切片，鸡蛋打散炒熟",
+      "锅中少油煎香肠至微焦",
+      "倒入米饭和鸡蛋翻炒",
+      "加盐调味，炒匀出锅"
+    ],
+    "time": 12,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1kkk"
+  },
+  {
+    "id": "onion-egg",
+    "name": "洋葱炒蛋",
+    "category": "家常菜",
+    "ingredients": ["鸡蛋", "洋葱"],
+    "steps": [
+      "洋葱切丝，鸡蛋打散",
+      "先炒鸡蛋盛出",
+      "锅中炒洋葱至变软出香味",
+      "倒入鸡蛋翻炒均匀，加盐出锅"
+    ],
+    "time": 12,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1lll"
+  },
+  {
+    "id": "potato-pepper",
+    "name": "青椒土豆片",
+    "category": "素菜",
+    "ingredients": ["土豆", "青椒"],
+    "steps": [
+      "土豆切片泡水，青椒切片",
+      "热锅下土豆片煎至两面金黄",
+      "加入青椒翻炒",
+      "调入盐和生抽，炒匀即可"
+    ],
+    "time": 20,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1mmm"
+  },
+  {
+    "id": "tomato-egg-rice",
+    "name": "番茄鸡蛋饭",
+    "category": "主食",
+    "ingredients": ["鸡蛋", "番茄", "米饭"],
+    "steps": [
+      "番茄切块，鸡蛋打散炒熟",
+      "炒番茄出汁，倒入鸡蛋",
+      "加入米饭翻炒均匀",
+      "加盐调味出锅"
+    ],
+    "time": 15,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1nnn"
+  },
+  {
+    "id": "beef-fried-rice",
+    "name": "牛肉炒饭",
+    "category": "主食",
+    "ingredients": ["牛肉", "米饭", "洋葱"],
+    "steps": [
+      "牛肉切丁，洋葱切丁",
+      "先炒牛肉至变色盛出",
+      "炒洋葱丁，加入米饭翻炒",
+      "倒入牛肉，加盐和生抽调味"
+    ],
+    "time": 18,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1ooo"
+  },
+  {
+    "id": "chicken-pepper",
+    "name": "鸡肉炒青椒",
+    "category": "家常菜",
+    "ingredients": ["鸡肉", "青椒"],
+    "steps": [
+      "鸡肉切片，加少许生抽腌制",
+      "青椒切块",
+      "热锅滑油，炒鸡肉至变色",
+      "加入青椒翻炒至断生",
+      "加盐调味出锅"
+    ],
+    "time": 18,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1ppp"
+  },
+  {
+    "id": "pork-onion",
+    "name": "洋葱炒肉",
+    "category": "家常菜",
+    "ingredients": ["猪肉", "洋葱"],
+    "steps": [
+      "猪肉切片，洋葱切丝",
+      "热锅下肉片煸炒出油",
+      "加入洋葱翻炒至变软",
+      "调入盐和生抽，炒匀出锅"
+    ],
+    "time": 15,
+    "difficulty": "简单",
+    "sourceUrl": "https://www.bilibili.com/video/BV1qqq"
+  }
+]

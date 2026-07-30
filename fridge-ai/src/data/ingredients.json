@@ -1,0 +1,22 @@
+[
+  { "id": "pork", "name": "猪肉", "category": "肉类", "unit": "g", "defaultQuantity": 300 },
+  { "id": "beef", "name": "牛肉", "category": "肉类", "unit": "g", "defaultQuantity": 300 },
+  { "id": "chicken", "name": "鸡肉", "category": "肉类", "unit": "g", "defaultQuantity": 300 },
+  { "id": "bacon", "name": "培根", "category": "肉类", "unit": "片", "defaultQuantity": 4 },
+  { "id": "sausage", "name": "香肠", "category": "肉类", "unit": "根", "defaultQuantity": 2 },
+
+  { "id": "egg", "name": "鸡蛋", "category": "蛋奶", "unit": "个", "defaultQuantity": 6 },
+  { "id": "milk", "name": "牛奶", "category": "蛋奶", "unit": "ml", "defaultQuantity": 500 },
+  { "id": "cheese", "name": "奶酪", "category": "蛋奶", "unit": "片", "defaultQuantity": 4 },
+
+  { "id": "tomato", "name": "番茄", "category": "蔬菜", "unit": "个", "defaultQuantity": 3 },
+  { "id": "potato", "name": "土豆", "category": "蔬菜", "unit": "个", "defaultQuantity": 2 },
+  { "id": "cabbage", "name": "白菜", "category": "蔬菜", "unit": "颗", "defaultQuantity": 1 },
+  { "id": "pepper", "name": "青椒", "category": "蔬菜", "unit": "个", "defaultQuantity": 2 },
+  { "id": "onion", "name": "洋葱", "category": "蔬菜", "unit": "个", "defaultQuantity": 1 },
+
+  { "id": "rice", "name": "米饭", "category": "主食", "unit": "碗", "defaultQuantity": 2 },
+  { "id": "noodles", "name": "面条", "category": "主食", "unit": "份", "defaultQuantity": 2 },
+  { "id": "mantou", "name": "馒头", "category": "主食", "unit": "个", "defaultQuantity": 4 },
+  { "id": "toast", "name": "吐司", "category": "主食", "unit": "片", "defaultQuantity": 4 }
+]
