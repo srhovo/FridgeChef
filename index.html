@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#10b981" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>冰箱管家 AI</title>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+
+      /* Golden ratio spacing scale (base 1rem = 16px) */
+      --space-3xs: 0.146rem;
+      --space-2xs: 0.236rem;
+      --space-xs: 0.382rem;
+      --space-sm: 0.618rem;
+      --space-md: 1rem;
+      --space-lg: 1.618rem;
+      --space-xl: 2.618rem;
+      --space-2xl: 4.236rem;
+
+      /* Golden ratio type scale */
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.272rem;
+      --text-2xl: 1.618rem;
+      --text-3xl: 2.058rem;
+      --text-4xl: 2.618rem;
+
+      --header-height: 4.5rem;
+      --container-max: 48rem;
+      --touch-min: 2.75rem;
+      --radius-sm: 0.5rem;
+      --radius-md: 0.809rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.618rem;
+      --radius-2xl: 2.058rem;
+      --card-padding: 1rem;
+      --hero-icon: 4rem;
+
+      /* ===== Mobile app system ===== */
+      --mobile-header: 3.25rem;          /* 52px compact top bar */
+      --button-height: 3rem;             /* 48px primary button */
+      --button-height-secondary: 2.5rem; /* 40px secondary button */
+      --button-height-icon: 2.5rem;      /* 40px icon button / stepper */
+      --tabbar-height: 3.5rem;           /* 56px bottom tab bar content */
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --tabbar-total: calc(var(--tabbar-height) + var(--safe-bottom));
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100dvh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding-top: var(--safe-top);
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(229,231,235,0.8);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+      height: var(--mobile-header);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: var(--text-base);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .logo-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 10px rgba(16,185,129,0.25);
+      flex-shrink: 0;
+    }
+
+    .logo-icon .icon { width: 1.1rem; height: 1.1rem; }
+
+    /* Bottom tab bar (replaces top pill nav) */
+    .tab-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    .tab-bar-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      height: var(--tabbar-height);
+      display: flex;
+      align-items: stretch;
+      padding: 0 max(var(--space-xs), var(--safe-right)) 0 max(var(--space-xs), var(--safe-left));
+    }
+
+    .tab-bar button {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 0.688rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .tab-bar button .icon { width: 1.375rem; height: 1.375rem; transition: transform .15s ease; }
+    .tab-bar button.active { color: var(--primary); }
+    .tab-bar button.active .icon { transform: translateY(-1px); }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: var(--container-max);
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--space-md) max(var(--space-md), var(--safe-right)) var(--space-md) max(var(--space-md), var(--safe-left));
+    }
+
+    .view {
+      animation: fadeIn .25s ease;
+      padding-bottom: calc(var(--tabbar-total) + var(--space-lg));
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .text-center { text-align: center; }
+    .hero-icon {
+      width: var(--hero-icon);
+      height: var(--hero-icon);
+      border-radius: var(--radius-xl);
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      margin: 0 auto var(--space-md);
+      box-shadow: 0 10px 24px rgba(16,185,129,0.25);
+    }
+
+    .hero-icon .icon { width: 2rem; height: 2rem; }
+
+    h1 { font-size: var(--text-3xl); margin: 0 0 var(--space-sm); color: #111827; }
+    h2 { font-size: var(--text-2xl); margin: 0 0 var(--space-sm); color: #111827; }
+    .lead { font-size: var(--text-lg); color: var(--text-muted); margin: 0; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: var(--card-padding);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .card + .card { margin-top: var(--space-md); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      min-height: var(--button-height);
+      padding: 0 var(--space-xl);
+      border-radius: var(--radius-lg);
+      border: none;
+      font-size: var(--text-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(16,185,129,0.22);
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+    }
+
+    .btn-ghost:hover { background: rgba(16,185,129,0.06); }
+
+    .btn-sm {
+      padding: 0 var(--space-md);
+      min-height: var(--button-height-secondary);
+      font-size: var(--text-sm);
+      border-radius: var(--radius-md);
+    }
+
+    /* Icon-only button (36-40px tap target): close, stepper, etc. */
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--button-height-icon);
+      height: var(--button-height-icon);
+      flex-shrink: 0;
+      border: none;
+      border-radius: var(--radius-md);
+      background: #f3f4f6;
+      color: #4b5563;
+      cursor: pointer;
+      transition: background .15s ease, transform .1s ease;
+    }
+
+    .btn-icon:active { background: #e5e7eb; transform: scale(0.95); }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl) var(--space-md);
+      color: var(--text-muted);
+      background: #f9fafb;
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border);
+      cursor: pointer;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); }
+
+    @media (max-width: 640px) {
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Tablet (768px+): restore a touch more breathing room */
+    @media (min-width: 768px) {
+      :root { --card-padding: 1.272rem; }
+      .add-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .ingredient-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      background: #f3f4f6;
+      border-radius: var(--radius-md);
+      border: 1px solid #f3f4f6;
+    }
+
+    .ingredient-chip span { font-weight: 500; color: #374151; }
+    .ingredient-chip small { color: #9ca3af; }
+
+    .search-wrap { position: relative; margin-bottom: var(--space-sm); }
+    .search-wrap svg {
+      position: absolute;
+      left: var(--space-md);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1rem;
+      height: 1rem;
+      color: #9ca3af;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      height: 3rem;
+      padding: 0 var(--space-md) 0 2.75rem;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      font-size: var(--text-base);
+      background: #fff;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+
+    .category-bar {
+      display: flex;
+      gap: var(--space-2xs);
+      overflow-x: auto;
+      padding-bottom: var(--space-xs);
+      margin-bottom: var(--space-md);
+      scrollbar-width: none;
+    }
+
+    .category-bar::-webkit-scrollbar { display: none; }
+
+    .category-bar button {
+      flex-shrink: 0;
+      padding: 0 var(--space-md);
+      height: var(--button-height-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid #f3f4f6;
+      background: #fff;
+      color: #4b5563;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .category-bar button.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(16,185,129,0.2);
+    }
+
+    /* Grouped list container (iOS-style): one card, hairline-divided rows */
+    .ingredient-list {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+      overflow: hidden;
+    }
+
+    .ingredient-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .12s ease;
+    }
+
+    .ingredient-list .ingredient-card:last-child { border-bottom: none; }
+    .ingredient-card:active { background: #f9fafb; }
+    .ingredient-card.checked {
+      background: rgba(16,185,129,0.05);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .ingredient-card .left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-width: 0;
+    }
+
+    .ingredient-card .emoji {
+      font-size: 1.25rem;
+      line-height: 1;
+      width: 1.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .checkbox {
+      width: 1.375rem;
+      height: 1.375rem;
+      border-radius: 50%;
+      border: 2px solid #d1d5db;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: all .15s ease;
+    }
+
+    .checkbox .icon { width: .875rem; height: .875rem; }
+
+    .ingredient-card.checked .checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .ingredient-card .name { font-weight: 600; color: #111827; font-size: var(--text-sm); line-height: 1.3; }
+    .ingredient-card .meta { font-size: var(--text-xs); color: #9ca3af; margin-top: 1px; }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2xs);
+      flex-shrink: 0;
+    }
+
+    .qty-controls button {
+      width: var(--button-height-icon);
+      height: var(--button-height-icon);
+      border-radius: var(--radius-md);
+      border: none;
+      background: #f3f4f6;
+      color: #4b5563;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .12s ease;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .qty-controls button .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .qty-controls button .icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .qty-controls button:active { background: #e5e7eb; }
+
+    .qty-controls span {
+      min-width: 3rem;
+      text-align: center;
+      font-size: var(--text-sm);
+      font-weight: 600;
+    }
+
+    .recipe-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      padding: var(--card-padding);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      cursor: pointer;
+      transition: transform .1s ease, box-shadow .15s ease;
+    }
+
+    .recipe-card:active { transform: scale(0.98); }
+
+    .recipe-card .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .recipe-card h3 { margin: 0; font-size: var(--text-lg); color: #111827; }
+    .recipe-card .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2xs);
+      margin-top: var(--space-xs);
+    }
+
+    .tag {
+      padding: var(--space-3xs) var(--space-xs);
+      border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .tag.primary { background: rgba(16,185,129,0.1); color: var(--primary-dark); }
+    .tag.success { background: #dcfce7; color: #166534; }
+    .tag.warn { background: #fef3c7; color: #92400e; }
+
+    .match-bar {
+      height: .5rem;
+      background: #f3f4f6;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: var(--space-xs);
+    }
+
+    .match-bar .fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+
+    .step-card {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--card-padding);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      margin-bottom: var(--space-md);
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+
+    .step-card.done { background: #f0fdf4; border-color: #bbf7d0; }
+
+    .step-num {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.1);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-card.done .step-num { background: var(--primary); color: #fff; }
+
+    .step-body { flex: 1; }
+    .step-body .label { font-size: var(--text-xs); color: #9ca3af; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+    .step-body p { margin: var(--space-3xs) 0 0; font-size: var(--text-lg); line-height: 1.5; color: #374151; }
+    .step-card.done .step-body p { color: #9ca3af; text-decoration: line-through; }
+
+    .progress {
+      height: .75rem;
+      background: #f3f4f6;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: var(--space-xs) 0 var(--space-lg);
+    }
+
+    .progress .fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: var(--tabbar-total);
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: var(--space-sm) max(var(--space-md), var(--safe-right)) var(--space-sm) max(var(--space-md), var(--safe-left));
+      z-index: 45;
+    }
+
+    .bottom-bar-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 70;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s ease;
+    }
+
+    .modal {
+      position: relative;
+      background: #fff;
+      border-radius: 1.25rem 1.25rem 0 0;
+      width: 100%;
+      max-width: var(--container-max);
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+      padding-bottom: var(--safe-bottom);
+      animation: sheetUp .25s cubic-bezier(.32,.72,0,1);
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: var(--space-sm);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.25rem;
+      height: .25rem;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 1.5rem var(--card-padding) var(--space-sm);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 { margin: 0; font-size: var(--text-lg); }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: var(--card-padding);
+    }
+
+    .add-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      min-height: var(--button-height-secondary);
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      cursor: pointer;
+      font-size: var(--text-sm);
+    }
+
+    .add-btn:active { background: #f3f4f6; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .select-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .select-bar select {
+      height: var(--button-height-secondary);
+      padding: 0 var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      font-size: var(--text-sm);
+    }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+      gap: var(--space-md);
+      padding-bottom: var(--space-2xl);
+    }
+
+    .mb-2 { margin-bottom: var(--space-md); }
+    .mb-3 { margin-bottom: var(--space-lg); }
+    .mt-1 { margin-top: var(--space-sm); }
+    .mt-2 { margin-top: var(--space-md); }
+    .w-full { width: 100%; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: var(--space-sm); }
+    .text-sm { font-size: var(--text-sm); }
+    .text-muted { color: var(--text-muted); }
+    .font-bold { font-weight: 700; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pb-footer { padding-bottom: calc(var(--tabbar-total) + 4.75rem + var(--space-md)); }
+
+    .icon { width: 1.25rem; height: 1.25rem; }
+    .icon-lg { width: 3rem; height: 3rem; }
+    .icon-sm { width: 1rem; height: 1rem; }
+  
+    /* 删除按钮（简约，位于数量控制右侧） */
+    .qty-controls .delete-btn {
+      margin-left: var(--space-2xs);
+      background: transparent;
+      color: #9ca3af;
+    }
+    .qty-controls .delete-btn .icon { width: 1rem; height: 1rem; }
+    .qty-controls .delete-btn:active { color: #ef4444; background: #fee2e2; }
+
+    /* 星级评分 */
+    .star-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .star-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .star-btn .icon { width: 1rem; height: 1rem; }
+    .star-btn.filled { color: #f59e0b; }
+    .star-btn.empty { color: #d1d5db; }
+    .recipe-card .star-rating { margin-top: var(--space-xs); }
+
+    /* 收藏页空状态按钮间距 */
+    .empty-state .btn { margin-top: var(--space-sm); }
+
+  </style>
+    
+    <meta name="AIGC" content='{"AIGC":{"Label":"2","ContentProducer":"WUSIGRAM","ProduceID":"SmD+h3qmApNVJLuPK9Ym0uNO6D35zXihLWc5XZ0kO+s=","ReservedCode1":"ZymrVnvOdmUarf+F14pkwWBRoSkMArbJh2TFCVnTRu+n7LP7BSwd+plwddetYqGoS8G4sLtlQ2HTGCKUnkf5KQ==","ContentPropagator":"","PropagateID":"","ReservedCode2":""}}'>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const INGREDIENTS = [{"id":"pork","name":"猪肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"beef","name":"牛肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"chicken","name":"鸡肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"bacon","name":"培根","category":"肉类","unit":"片","defaultQuantity":4,"quantity":4,"checked":false},{"id":"sausage","name":"香肠","category":"肉类","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"lamb","name":"羊肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"ribs","name":"排骨","category":"肉类","unit":"g","defaultQuantity":400,"quantity":400,"checked":false},{"id":"minced-pork","name":"肉末","category":"肉类","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"chicken-wing","name":"鸡翅","category":"肉类","unit":"个","defaultQuantity":6,"quantity":6,"checked":false},{"id":"chicken-leg","name":"鸡腿","category":"肉类","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"ham","name":"火腿","category":"肉类","unit":"片","defaultQuantity":4,"quantity":4,"checked":false},{"id":"duck","name":"鸭肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"minced-beef","name":"牛肉末","category":"肉类","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"preserved-meat","name":"腊肉","category":"肉类","unit":"g","defaultQuantity":150,"quantity":150,"checked":false},{"id":"pork-belly","name":"五花肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"pork-liver","name":"猪肝","category":"肉类","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"pork-kidney","name":"猪腰","category":"肉类","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"pig-feet","name":"猪蹄","category":"肉类","unit":"只","defaultQuantity":1,"quantity":1,"checked":false},{"id":"chicken-gizzard","name":"鸡胗","category":"肉类","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"duck-leg","name":"鸭腿","category":"肉类","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"meatball","name":"肉丸","category":"肉类","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"luncheon-meat","name":"午餐肉","category":"肉类","unit":"罐","defaultQuantity":1,"quantity":1,"checked":false},{"id":"spam","name":"火腿肠","category":"肉类","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"chicken-feet","name":"鸡爪","category":"肉类","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"duck-feet","name":"鸭掌","category":"肉类","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"pig-ear","name":"猪耳","category":"肉类","unit":"只","defaultQuantity":1,"quantity":1,"checked":false},{"id":"pig-stomach","name":"猪肚","category":"肉类","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"beef-tripe","name":"牛肚","category":"肉类","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"beef-mixed","name":"牛杂","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"pig-intestine","name":"肥肠","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"pig-blood","name":"猪血","category":"肉类","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"duck-blood","name":"鸭血","category":"肉类","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"rabbit","name":"兔肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"goose","name":"鹅肉","category":"肉类","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"shrimp","name":"虾仁","category":"海鲜","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"fish-ball","name":"鱼丸","category":"海鲜","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"fish","name":"鱼","category":"海鲜","unit":"条","defaultQuantity":1,"quantity":1,"checked":false},{"id":"squid","name":"鱿鱼","category":"海鲜","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"clam","name":"蛤蜊","category":"海鲜","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"crab","name":"蟹","category":"海鲜","unit":"只","defaultQuantity":2,"quantity":2,"checked":false},{"id":"scallop","name":"扇贝","category":"海鲜","unit":"个","defaultQuantity":6,"quantity":6,"checked":false},{"id":"kelp","name":"海带","category":"海鲜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"hairtail","name":"带鱼","category":"海鲜","unit":"条","defaultQuantity":1,"quantity":1,"checked":false},{"id":"yellow-croaker","name":"黄花鱼","category":"海鲜","unit":"条","defaultQuantity":1,"quantity":1,"checked":false},{"id":"mackerel","name":"鲅鱼","category":"海鲜","unit":"条","defaultQuantity":1,"quantity":1,"checked":false},{"id":"dried-shrimp","name":"虾皮","category":"海鲜","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"laver","name":"紫菜","category":"海鲜","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"abalone","name":"鲍鱼","category":"海鲜","unit":"个","defaultQuantity":6,"quantity":6,"checked":false},{"id":"sea-cucumber","name":"海参","category":"海鲜","unit":"只","defaultQuantity":3,"quantity":3,"checked":false},{"id":"eel","name":"鳗鱼","category":"海鲜","unit":"条","defaultQuantity":1,"quantity":1,"checked":false},{"id":"finless-eel","name":"鳝鱼","category":"海鲜","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"oyster","name":"牡蛎","category":"海鲜","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"octopus","name":"章鱼","category":"海鲜","unit":"只","defaultQuantity":1,"quantity":1,"checked":false},{"id":"crayfish","name":"小龙虾","category":"海鲜","unit":"g","defaultQuantity":500,"quantity":500,"checked":false},{"id":"river-snail","name":"螺蛳","category":"海鲜","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"dried-scallop","name":"干贝","category":"海鲜","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"shrimp-roe","name":"虾子","category":"海鲜","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"bullfrog","name":"牛蛙","category":"海鲜","unit":"只","defaultQuantity":2,"quantity":2,"checked":false},{"id":"tripe","name":"毛肚","category":"海鲜","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"egg","name":"鸡蛋","category":"蛋奶","unit":"个","defaultQuantity":6,"quantity":6,"checked":false},{"id":"milk","name":"牛奶","category":"蛋奶","unit":"ml","defaultQuantity":500,"quantity":500,"checked":false},{"id":"cheese","name":"奶酪","category":"蛋奶","unit":"片","defaultQuantity":4,"quantity":4,"checked":false},{"id":"tofu","name":"豆腐","category":"蛋奶","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"tofu-skin","name":"豆皮","category":"蛋奶","unit":"张","defaultQuantity":2,"quantity":2,"checked":false},{"id":"dried-tofu","name":"豆干","category":"蛋奶","unit":"块","defaultQuantity":4,"quantity":4,"checked":false},{"id":"quail-egg","name":"鹌鹑蛋","category":"蛋奶","unit":"个","defaultQuantity":10,"quantity":10,"checked":false},{"id":"duck-egg","name":"鸭蛋","category":"蛋奶","unit":"个","defaultQuantity":4,"quantity":4,"checked":false},{"id":"yuba","name":"腐竹","category":"蛋奶","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"thousand-sheet","name":"千张","category":"蛋奶","unit":"张","defaultQuantity":2,"quantity":2,"checked":false},{"id":"fried-tofu","name":"油豆腐","category":"蛋奶","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"yogurt","name":"酸奶","category":"蛋奶","unit":"杯","defaultQuantity":2,"quantity":2,"checked":false},{"id":"butter","name":"黄油","category":"蛋奶","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"tomato","name":"番茄","category":"蔬菜","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"potato","name":"土豆","category":"蔬菜","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"cabbage","name":"白菜","category":"蔬菜","unit":"颗","defaultQuantity":1,"quantity":1,"checked":false},{"id":"pepper","name":"青椒","category":"蔬菜","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"onion","name":"洋葱","category":"蔬菜","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"carrot","name":"胡萝卜","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"cucumber","name":"黄瓜","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"eggplant","name":"茄子","category":"蔬菜","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"zucchini","name":"西葫芦","category":"蔬菜","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"spinach","name":"菠菜","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"celery","name":"芹菜","category":"蔬菜","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"chives","name":"韭菜","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"scallion","name":"大葱","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"garlic","name":"大蒜","category":"蔬菜","unit":"头","defaultQuantity":1,"quantity":1,"checked":false},{"id":"ginger","name":"生姜","category":"蔬菜","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"green-onion","name":"小葱","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"cilantro","name":"香菜","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"corn","name":"玉米粒","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"pumpkin","name":"南瓜","category":"蔬菜","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"radish","name":"白萝卜","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"bitter-melon","name":"苦瓜","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"lettuce","name":"生菜","category":"蔬菜","unit":"颗","defaultQuantity":1,"quantity":1,"checked":false},{"id":"bean-sprouts","name":"豆芽","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"green-beans","name":"豆角","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"lotus-root","name":"莲藕","category":"蔬菜","unit":"节","defaultQuantity":1,"quantity":1,"checked":false},{"id":"asparagus","name":"芦笋","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"cauliflower","name":"花菜","category":"蔬菜","unit":"颗","defaultQuantity":1,"quantity":1,"checked":false},{"id":"broccoli","name":"西兰花","category":"蔬菜","unit":"颗","defaultQuantity":1,"quantity":1,"checked":false},{"id":"baby-cabbage","name":"娃娃菜","category":"蔬菜","unit":"颗","defaultQuantity":1,"quantity":1,"checked":false},{"id":"oil-rape","name":"油麦菜","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"celtuce","name":"莴笋","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"winter-melon","name":"冬瓜","category":"蔬菜","unit":"块","defaultQuantity":1,"quantity":1,"checked":false},{"id":"dried-chili","name":"干辣椒","category":"蔬菜","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"sichuan-pepper","name":"花椒","category":"蔬菜","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"preserved-veg","name":"榨菜","category":"蔬菜","unit":"包","defaultQuantity":1,"quantity":1,"checked":false},{"id":"pickled-beans","name":"酸豆角","category":"蔬菜","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"sprouts","name":"芽菜","category":"蔬菜","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"peanut","name":"花生","category":"蔬菜","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"purple-sweet-potato","name":"紫薯","category":"蔬菜","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"pineapple","name":"菠萝","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"long-bean","name":"豇豆","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"lentil","name":"扁豆","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"snow-pea","name":"荷兰豆","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"okra","name":"秋葵","category":"蔬菜","unit":"根","defaultQuantity":6,"quantity":6,"checked":false},{"id":"loofah","name":"丝瓜","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"chayote","name":"佛手瓜","category":"蔬菜","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"chinese-broccoli","name":"芥蓝","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"yu-choy","name":"菜心","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"water-spinach","name":"空心菜","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"garlic-sprout","name":"蒜苗","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"garlic-stem","name":"蒜苔","category":"蔬菜","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"yam","name":"山药","category":"蔬菜","unit":"根","defaultQuantity":1,"quantity":1,"checked":false},{"id":"bamboo-shoot","name":"竹笋","category":"蔬菜","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"water-chestnut","name":"荸荠","category":"蔬菜","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"lotus-seed","name":"莲子","category":"蔬菜","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"lily-bulb","name":"百合","category":"蔬菜","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"hot-pepper","name":"小米辣","category":"蔬菜","unit":"根","defaultQuantity":3,"quantity":3,"checked":false},{"id":"pickled-cabbage","name":"酸菜","category":"蔬菜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"kimchi","name":"泡菜","category":"蔬菜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"snow-vegetable","name":"雪菜","category":"蔬菜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"pickled-radish","name":"酸萝卜","category":"蔬菜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"mustard-tuber","name":"藠头","category":"蔬菜","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"perilla","name":"紫苏","category":"蔬菜","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"toon","name":"香椿","category":"蔬菜","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"shepherds-purse","name":"荠菜","category":"蔬菜","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"daylily","name":"黄花菜","category":"蔬菜","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"mushroom","name":"蘑菇","category":"菌菇","unit":"个","defaultQuantity":6,"quantity":6,"checked":false},{"id":"enoki","name":"金针菇","category":"菌菇","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"wood-ear","name":"木耳","category":"菌菇","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"shiitake","name":"香菇","category":"菌菇","unit":"朵","defaultQuantity":6,"quantity":6,"checked":false},{"id":"oyster-mushroom","name":"平菇","category":"菌菇","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"tea-tree-mushroom","name":"茶树菇","category":"菌菇","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"king-oyster","name":"杏鲍菇","category":"菌菇","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"white-fungus","name":"银耳","category":"菌菇","unit":"朵","defaultQuantity":1,"quantity":1,"checked":false},{"id":"bamboo-fungus","name":"竹荪","category":"菌菇","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"monkey-head","name":"猴头菇","category":"菌菇","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"button-mushroom","name":"口蘑","category":"菌菇","unit":"个","defaultQuantity":8,"quantity":8,"checked":false},{"id":"rice","name":"米饭","category":"主食","unit":"碗","defaultQuantity":2,"quantity":2,"checked":false},{"id":"noodles","name":"面条","category":"主食","unit":"份","defaultQuantity":2,"quantity":2,"checked":false},{"id":"mantou","name":"馒头","category":"主食","unit":"个","defaultQuantity":4,"quantity":4,"checked":false},{"id":"toast","name":"吐司","category":"主食","unit":"片","defaultQuantity":4,"quantity":4,"checked":false},{"id":"dumpling-wrapper","name":"饺子皮","category":"主食","unit":"张","defaultQuantity":20,"quantity":20,"checked":false},{"id":"wonton-wrapper","name":"馄饨皮","category":"主食","unit":"张","defaultQuantity":20,"quantity":20,"checked":false},{"id":"rice-noodles","name":"米粉","category":"主食","unit":"份","defaultQuantity":2,"quantity":2,"checked":false},{"id":"vermicelli","name":"粉丝","category":"主食","unit":"把","defaultQuantity":1,"quantity":1,"checked":false},{"id":"rice-cake","name":"年糕","category":"主食","unit":"片","defaultQuantity":10,"quantity":10,"checked":false},{"id":"flour","name":"面粉","category":"主食","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"oats","name":"燕麦","category":"主食","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"red-bean","name":"红豆","category":"主食","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"glutinous-rice","name":"糯米","category":"主食","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"banana","name":"香蕉","category":"水果","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"cornmeal","name":"玉米面","category":"主食","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"buckwheat-noodles","name":"荞麦面","category":"主食","unit":"份","defaultQuantity":2,"quantity":2,"checked":false},{"id":"river-noodles","name":"河粉","category":"主食","unit":"份","defaultQuantity":2,"quantity":2,"checked":false},{"id":"liangpi","name":"凉皮","category":"主食","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"bread","name":"面包","category":"主食","unit":"片","defaultQuantity":4,"quantity":4,"checked":false},{"id":"pasta","name":"意大利面","category":"主食","unit":"份","defaultQuantity":2,"quantity":2,"checked":false},{"id":"tangyuan","name":"汤圆","category":"主食","unit":"个","defaultQuantity":10,"quantity":10,"checked":false},{"id":"corn-on-cob","name":"玉米","category":"主食","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"sweet-potato","name":"红薯","category":"主食","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"chestnut","name":"板栗","category":"主食","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"millet","name":"小米","category":"主食","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"soybean","name":"黄豆","category":"主食","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"glutinous-rice-flour","name":"糯米粉","category":"主食","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"rice-flour","name":"大米粉","category":"主食","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"sticky-rice-flour","name":"粘米粉","category":"主食","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"water-chestnut-flour","name":"马蹄粉","category":"主食","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"lemon","name":"柠檬","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"mango","name":"芒果","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"apple","name":"苹果","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"hawthorn","name":"山楂","category":"水果","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"pear","name":"雪梨","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"coconut","name":"椰子","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"avocado","name":"牛油果","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"sugar","name":"糖","category":"调料","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"rock-sugar","name":"冰糖","category":"调料","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"brown-sugar","name":"红糖","category":"调料","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"cooking-wine","name":"料酒","category":"调料","unit":"ml","defaultQuantity":30,"quantity":30,"checked":false},{"id":"vinegar","name":"醋","category":"调料","unit":"ml","defaultQuantity":20,"quantity":20,"checked":false},{"id":"doubanjiang","name":"豆瓣酱","category":"调料","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"black-bean","name":"豆豉","category":"调料","unit":"g","defaultQuantity":15,"quantity":15,"checked":false},{"id":"laoganma","name":"老干妈","category":"调料","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"sesame-paste","name":"芝麻酱","category":"调料","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"ketchup","name":"番茄酱","category":"调料","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"cumin","name":"孜然","category":"调料","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"pepper","name":"胡椒","category":"调料","unit":"g","defaultQuantity":3,"quantity":3,"checked":false},{"id":"mustard","name":"芥末","category":"调料","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"chili","name":"辣椒","category":"调料","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"miso","name":"味噌","category":"调料","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"beer","name":"啤酒","category":"调料","unit":"瓶","defaultQuantity":1,"quantity":1,"checked":false},{"id":"goji","name":"枸杞","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"red-date","name":"红枣","category":"干货/其他","unit":"颗","defaultQuantity":6,"quantity":6,"checked":false},{"id":"dried-tangerine","name":"陈皮","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"dried-longan","name":"桂圆","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"tea","name":"茶叶","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"longjing","name":"龙井茶","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"biluochun","name":"碧螺春","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"codonopsis","name":"花旗参","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"cordyceps","name":"虫草花","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"angelica","name":"当归","category":"干货/其他","unit":"g","defaultQuantity":5,"quantity":5,"checked":false},{"id":"sago","name":"西米","category":"干货/其他","unit":"g","defaultQuantity":30,"quantity":30,"checked":false},{"id":"coconut-milk","name":"椰奶","category":"干货/其他","unit":"ml","defaultQuantity":200,"quantity":200,"checked":false},{"id":"ice-grass-seed","name":"冰粉籽","category":"干货/其他","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"turtle-jelly","name":"龟苓膏粉","category":"干货/其他","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"grass-jelly","name":"凉粉","category":"干货/其他","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"sesame","name":"芝麻","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"black-sesame","name":"黑芝麻","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"soybean-powder","name":"黄豆粉","category":"干货/其他","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"osmanthus","name":"糖桂花","category":"干货/其他","unit":"g","defaultQuantity":15,"quantity":15,"checked":false},{"id":"ginkgo","name":"银杏","category":"干货/其他","unit":"g","defaultQuantity":20,"quantity":20,"checked":false},{"id":"seaweed","name":"裙带菜","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"you-tiao","name":"油条","category":"干货/其他","unit":"根","defaultQuantity":2,"quantity":2,"checked":false},{"id":"bing","name":"饼","category":"干货/其他","unit":"张","defaultQuantity":2,"quantity":2,"checked":false},{"id":"spring-roll-wrapper","name":"春卷皮","category":"干货/其他","unit":"张","defaultQuantity":10,"quantity":10,"checked":false},{"id":"cold-noodle","name":"冷面","category":"干货/其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"fern-root","name":"蕨根粉","category":"干货/其他","unit":"g","defaultQuantity":50,"quantity":50,"checked":false},{"id":"liangpi-sheet","name":"拉皮","category":"干货/其他","unit":"张","defaultQuantity":2,"quantity":2,"checked":false},{"id":"wheat-gluten","name":"面筋","category":"干货/其他","unit":"个","defaultQuantity":4,"quantity":4,"checked":false},{"id":"fish-cake","name":"鱼饼","category":"干货/其他","unit":"个","defaultQuantity":4,"quantity":4,"checked":false},{"id":"century-egg","name":"皮蛋","category":"干货/其他","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"shark-fin","name":"鱼翅","category":"干货/其他","unit":"g","defaultQuantity":10,"quantity":10,"checked":false},{"id":"九层塔","name":"九层塔","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"剁椒","name":"剁椒","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"梅干菜","name":"梅干菜","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"油菜","name":"油菜","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"泡椒","name":"泡椒","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"紫甘蓝","name":"紫甘蓝","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"臭豆腐","name":"臭豆腐","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"蒜蓉","name":"蒜蓉","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"蒲菜","name":"蒲菜","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"藤椒","name":"藤椒","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"蛇肉","name":"蛇肉","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"豌豆","name":"豌豆","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"青豆","name":"青豆","category":"其他","unit":"份","defaultQuantity":1,"quantity":1,"checked":false},{"id":"orange","name":"橙子","category":"水果","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"tangerine","name":"橘子","category":"水果","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"grape","name":"葡萄","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"strawberry","name":"草莓","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"blueberry","name":"蓝莓","category":"水果","unit":"g","defaultQuantity":125,"quantity":125,"checked":false},{"id":"watermelon","name":"西瓜","category":"水果","unit":"g","defaultQuantity":500,"quantity":500,"checked":false},{"id":"hami-melon","name":"哈密瓜","category":"水果","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"papaya","name":"木瓜","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"dragon-fruit","name":"火龙果","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"kiwi","name":"猕猴桃","category":"水果","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"durian","name":"榴莲","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"lychee","name":"荔枝","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"longan","name":"龙眼","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"sugarcane","name":"甘蔗","category":"水果","unit":"g","defaultQuantity":300,"quantity":300,"checked":false},{"id":"water-chestnut-fruit","name":"马蹄","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"bayberry","name":"杨梅","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"loquat","name":"枇杷","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"passion-fruit","name":"百香果","category":"水果","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"cranberry","name":"蔓越莓","category":"水果","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"raspberry","name":"覆盆子","category":"水果","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"kumquat","name":"金桔","category":"水果","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"pomelo","name":"柚子","category":"水果","unit":"个","defaultQuantity":1,"quantity":1,"checked":false},{"id":"persimmon","name":"柿子","category":"水果","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"jujube","name":"枣","category":"水果","unit":"g","defaultQuantity":100,"quantity":100,"checked":false},{"id":"cherry","name":"樱桃","category":"水果","unit":"g","defaultQuantity":200,"quantity":200,"checked":false},{"id":"plum","name":"李子","category":"水果","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"apricot","name":"杏子","category":"水果","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"peach","name":"桃子","category":"水果","unit":"个","defaultQuantity":2,"quantity":2,"checked":false},{"id":"blackberry","name":"黑莓","category":"水果","unit":"g","defaultQuantity":125,"quantity":125,"checked":false},{"id":"fig","name":"无花果","category":"水果","unit":"个","defaultQuantity":3,"quantity":3,"checked":false},{"id":"olive","name":"橄榄","category":"水果","unit":"g","defaultQuantity":100,"quantity":100,"checked":false}];
+    const RECIPES = [{"name":"番茄炒蛋","category":"家常菜","ingredients":["番茄","鸡蛋"],"steps":["番茄切块，鸡蛋打散备用","热锅倒油，倒入蛋液炒散盛出","锅中留底油炒番茄出汁","倒入鸡蛋翻炒均匀即可"],"time":10,"difficulty":"简单","id":"1","sourceUrl":"https://www.bilibili.com/video/BV1xxx001"},{"name":"土豆炖牛肉","category":"家常菜","ingredients":["牛肉","土豆","胡萝卜","洋葱"],"steps":["牛肉切块焯水备用","土豆、胡萝卜、洋葱切块","锅中炒香洋葱，放入牛肉翻炒","加水炖煮1小时，放入土豆胡萝卜炖熟"],"time":90,"difficulty":"中等","id":"2","sourceUrl":"https://www.bilibili.com/video/BV1xxx002"},{"name":"青椒肉丝","category":"家常菜","ingredients":["猪肉","青椒"],"steps":["猪肉切丝，青椒切丝","肉丝加淀粉腌制10分钟","热锅快炒肉丝变色盛出","炒青椒丝，倒入肉丝翻炒均匀"],"time":20,"difficulty":"简单","id":"3","sourceUrl":"https://www.bilibili.com/video/BV1xxx003"},{"name":"红烧肉","category":"家常菜","ingredients":["五花肉"],"steps":["五花肉切块焯水","锅中煸炒肉块至微焦","加入调料和开水小火炖煮40分钟","大火收汁即可出锅"],"time":60,"difficulty":"中等","id":"4","sourceUrl":"https://www.bilibili.com/video/BV1xxx004"},{"name":"宫保鸡丁","category":"家常菜","ingredients":["鸡肉","青椒","胡萝卜","花生"],"steps":["鸡肉切丁腌制","胡萝卜、青椒切丁","热锅滑炒鸡丁变色盛出","爆香配料，倒入鸡丁翻炒出锅"],"time":25,"difficulty":"中等","id":"5","sourceUrl":"https://www.bilibili.com/video/BV1xxx005"},{"name":"鱼香肉丝","category":"家常菜","ingredients":["猪肉","胡萝卜","青椒","木耳"],"steps":["猪肉、胡萝卜、青椒、木耳切丝","肉丝腌制备用","热锅炒肉丝变色盛出","炒配菜后倒入肉丝，加入料汁翻炒均匀"],"time":25,"difficulty":"中等","id":"6","sourceUrl":"https://www.bilibili.com/video/BV1xxx006"},{"name":"可乐鸡翅","category":"家常菜","ingredients":["鸡翅"],"steps":["鸡翅两面划刀焯水","锅中煎至两面金黄","倒入可乐没过鸡翅","中小火焖煮20分钟，大火收汁"],"time":35,"difficulty":"简单","id":"7","sourceUrl":"https://www.bilibili.com/video/BV1xxx007"},{"name":"糖醋排骨","category":"家常菜","ingredients":["排骨"],"steps":["排骨剁块焯水洗净","锅中煎至表面微焦","加开水和糖醋汁小火炖煮40分钟","大火收汁装盘"],"time":60,"difficulty":"中等","id":"8","sourceUrl":"https://www.bilibili.com/video/BV1xxx008"},{"name":"蒜蓉虾仁","category":"家常菜","ingredients":["虾仁","大蒜"],"steps":["虾仁洗净沥干，大蒜切末","锅中炒香蒜末","倒入虾仁大火快炒","虾仁变红卷曲即可出锅"],"time":10,"difficulty":"简单","id":"9","sourceUrl":"https://www.bilibili.com/video/BV1xxx009"},{"name":"肉末茄子","category":"家常菜","ingredients":["肉末","茄子"],"steps":["茄子切条蒸熟","锅中炒香肉末","加入茄子翻炒均匀","调入料汁焖煮入味"],"time":25,"difficulty":"简单","id":"10","sourceUrl":"https://www.bilibili.com/video/BV1xxx010"},{"name":"番茄牛腩","category":"家常菜","ingredients":["牛肉","番茄","洋葱"],"steps":["牛肉切块焯水","番茄、洋葱切块","炒香洋葱和番茄，放入牛肉翻炒","加水炖煮1.5小时至软烂"],"time":100,"difficulty":"中等","id":"11","sourceUrl":"https://www.bilibili.com/video/BV1xxx011"},{"name":"麻婆豆腐","category":"家常菜","ingredients":["豆腐","肉末"],"steps":["豆腐切块焯水去豆腥","锅中炒香肉末","加入豆腐和少量水轻轻推动","小火炖煮入味后勾芡出锅"],"time":20,"difficulty":"中等","id":"12","sourceUrl":"https://www.bilibili.com/video/BV1xxx012"},{"name":"回锅肉","category":"家常菜","ingredients":["五花肉","青椒","洋葱"],"steps":["猪肉煮熟切片备用","青椒、洋葱切片","锅中煸炒肉片出油","加入青椒洋葱翻炒出香味"],"time":25,"difficulty":"中等","id":"13","sourceUrl":"https://www.bilibili.com/video/BV1xxx013"},{"name":"农家小炒肉","category":"家常菜","ingredients":["猪肉","青椒","大蒜"],"steps":["猪肉切片，青椒切块","锅中煸炒肉片出油","加入大蒜和青椒爆炒","翻炒均匀出锅"],"time":15,"difficulty":"简单","id":"14","sourceUrl":"https://www.bilibili.com/video/BV1xxx014"},{"name":"蒜香排骨","category":"家常菜","ingredients":["排骨","大蒜"],"steps":["排骨剁块加蒜末腌制","放入蒸锅蒸30分钟","取出沥干","炸至表面金黄即可"],"time":50,"difficulty":"中等","id":"15","sourceUrl":"https://www.bilibili.com/video/BV1xxx015"},{"name":"咖喱鸡肉","category":"家常菜","ingredients":["鸡肉","土豆","胡萝卜","洋葱"],"steps":["鸡肉切块，土豆胡萝卜洋葱切块","锅中炒香洋葱和鸡肉","加入土豆胡萝卜翻炒","加水炖煮熟后加入咖喱块融化"],"time":40,"difficulty":"简单","id":"16","sourceUrl":"https://www.bilibili.com/video/BV1xxx016"},{"name":"香菇滑鸡","category":"家常菜","ingredients":["鸡肉","香菇"],"steps":["鸡肉切块腌制，香菇泡发","将鸡肉和香菇拌匀","放入蒸锅大火蒸20分钟","出锅撒上葱花"],"time":30,"difficulty":"简单","id":"17","sourceUrl":"https://www.bilibili.com/video/BV1xxx017"},{"name":"葱爆羊肉","category":"家常菜","ingredients":["羊肉","大葱"],"steps":["羊肉切片，大葱斜切","热锅快炒羊肉至变色","加入大葱爆炒出香味","翻炒均匀出锅"],"time":15,"difficulty":"中等","id":"18","sourceUrl":"https://www.bilibili.com/video/BV1xxx018"},{"name":"水煮肉片","category":"家常菜","ingredients":["猪肉","白菜","干辣椒"],"steps":["猪肉切片腌制","白菜焯水铺底","锅中煮肉片至熟","连汤倒入碗中，撒上辣椒花椒泼热油"],"time":30,"difficulty":"中等","id":"19","sourceUrl":"https://www.bilibili.com/video/BV1xxx019"},{"name":"土豆烧排骨","category":"家常菜","ingredients":["排骨","土豆"],"steps":["排骨焯水备用，土豆切块","锅中炒香排骨","加开水炖煮30分钟","放入土豆继续炖煮至软烂"],"time":55,"difficulty":"中等","id":"20","sourceUrl":"https://www.bilibili.com/video/BV1xxx020"},{"name":"蚝油生菜","category":"家常菜","ingredients":["生菜","大蒜"],"steps":["生菜洗净沥干","大蒜切末","锅中炒香蒜末","加入生菜大火快炒，淋蚝油出锅"],"time":5,"difficulty":"简单","id":"21","sourceUrl":"https://www.bilibili.com/video/BV1xxx021"},{"name":"干煸豆角","category":"家常菜","ingredients":["豆角","干辣椒","花椒"],"steps":["豆角洗净掰段","锅中干煸至表皮起皱","爆香干辣椒花椒","倒入豆角翻炒均匀"],"time":20,"difficulty":"中等","id":"22","sourceUrl":"https://www.bilibili.com/video/BV1xxx022"},{"name":"蒜蓉西兰花","category":"家常菜","ingredients":["西兰花","大蒜"],"steps":["西兰花切小朵焯水","大蒜切末","锅中炒香蒜末","倒入西兰花翻炒均匀"],"time":10,"difficulty":"简单","id":"23","sourceUrl":"https://www.bilibili.com/video/BV1xxx023"},{"name":"酸辣土豆丝","category":"家常菜","ingredients":["土豆","干辣椒","花椒"],"steps":["土豆切丝泡水","锅中爆香干辣椒花椒","倒入土豆丝大火快炒","加醋调味出锅"],"time":10,"difficulty":"简单","id":"24","sourceUrl":"https://www.bilibili.com/video/BV1xxx024"},{"name":"手撕包菜","category":"家常菜","ingredients":["白菜","干辣椒"],"steps":["包菜手撕成片","锅中爆香干辣椒","倒入包菜大火快炒","加盐调味出锅"],"time":10,"difficulty":"简单","id":"25","sourceUrl":"https://www.bilibili.com/video/BV1xxx025"},{"name":"韭菜炒蛋","category":"家常菜","ingredients":["韭菜","鸡蛋"],"steps":["韭菜切段，鸡蛋打散","热锅倒油炒蛋盛出","炒韭菜变软","倒入鸡蛋翻炒均匀"],"time":10,"difficulty":"简单","id":"26","sourceUrl":"https://www.bilibili.com/video/BV1xxx026"},{"name":"西葫芦炒蛋","category":"家常菜","ingredients":["西葫芦","鸡蛋"],"steps":["西葫芦切片，鸡蛋打散","先炒鸡蛋盛出","炒西葫芦变软","倒入鸡蛋翻炒均匀"],"time":10,"difficulty":"简单","id":"27","sourceUrl":"https://www.bilibili.com/video/BV1xxx027"},{"name":"芹菜炒肉","category":"家常菜","ingredients":["猪肉","芹菜"],"steps":["猪肉切丝，芹菜切段","热锅快炒肉丝变色","加入芹菜翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"28","sourceUrl":"https://www.bilibili.com/video/BV1xxx028"},{"name":"洋葱炒蛋","category":"家常菜","ingredients":["洋葱","鸡蛋"],"steps":["洋葱切丝，鸡蛋打散","先炒鸡蛋盛出","炒洋葱变软","倒入鸡蛋翻炒均匀"],"time":10,"difficulty":"简单","id":"29","sourceUrl":"https://www.bilibili.com/video/BV1xxx029"},{"name":"蒜苔炒肉","category":"家常菜","ingredients":["猪肉","蒜苔"],"steps":["猪肉切丝，蒜苔切段","热锅快炒肉丝","加入蒜苔翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"30","sourceUrl":"https://www.bilibili.com/video/BV1xxx030"},{"name":"莴笋炒肉","category":"家常菜","ingredients":["猪肉","莴笋"],"steps":["猪肉切片，莴笋切片","热锅炒肉片","加入莴笋翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"31","sourceUrl":"https://www.bilibili.com/video/BV1xxx031"},{"name":"苦瓜炒蛋","category":"家常菜","ingredients":["苦瓜","鸡蛋"],"steps":["苦瓜切片焯水去苦味","鸡蛋打散炒熟","加入苦瓜翻炒均匀","调味出锅"],"time":15,"difficulty":"简单","id":"32","sourceUrl":"https://www.bilibili.com/video/BV1xxx032"},{"name":"冬瓜排骨汤","category":"家常菜","ingredients":["排骨","冬瓜"],"steps":["排骨焯水备用","加水炖煮排骨30分钟","放入冬瓜块继续煮","加盐调味出锅"],"time":50,"difficulty":"简单","id":"33","sourceUrl":"https://www.bilibili.com/video/BV1xxx033"},{"name":"萝卜炖牛腩","category":"家常菜","ingredients":["牛肉","白萝卜"],"steps":["牛肉切块焯水","白萝卜切块","一起加水炖煮1小时","加盐调味出锅"],"time":90,"difficulty":"中等","id":"34","sourceUrl":"https://www.bilibili.com/video/BV1xxx034"},{"name":"啤酒鸭","category":"家常菜","ingredients":["鸭肉","啤酒"],"steps":["鸭肉切块焯水","锅中煸炒鸭肉出油","倒入啤酒没过鸭肉","小火炖煮40分钟收汁"],"time":60,"difficulty":"中等","id":"35","sourceUrl":"https://www.bilibili.com/video/BV1xxx035"},{"name":"三杯鸡","category":"家常菜","ingredients":["鸡肉","大蒜","生姜","九层塔"],"steps":["鸡肉切块","锅中炒香姜蒜","倒入鸡肉翻炒","加料酒酱油糖炖煮收汁"],"time":40,"difficulty":"中等","id":"36","sourceUrl":"https://www.bilibili.com/video/BV1xxx036"},{"name":"菠萝咕咾肉","category":"家常菜","ingredients":["猪肉","菠萝","青椒"],"steps":["猪肉切块腌制","裹粉炸至金黄","菠萝青椒切块","调酸甜汁翻炒均匀"],"time":35,"difficulty":"中等","id":"37","sourceUrl":"https://www.bilibili.com/video/BV1xxx037"},{"name":"椒盐排骨","category":"家常菜","ingredients":["排骨"],"steps":["排骨剁块腌制","裹粉炸至金黄","撒上椒盐翻炒均匀","出锅装盘"],"time":40,"difficulty":"中等","id":"38","sourceUrl":"https://www.bilibili.com/video/BV1xxx038"},{"name":"孜然羊肉","category":"家常菜","ingredients":["羊肉","洋葱","孜然"],"steps":["羊肉切片腌制","热锅快炒羊肉","加入洋葱翻炒","撒上孜然出锅"],"time":20,"difficulty":"中等","id":"39","sourceUrl":"https://www.bilibili.com/video/BV1xxx039"},{"name":"酱爆鸡丁","category":"家常菜","ingredients":["鸡肉","黄瓜","胡萝卜"],"steps":["鸡肉切丁腌制","黄瓜胡萝卜切丁","热锅滑炒鸡丁","加甜面酱翻炒均匀"],"time":25,"difficulty":"中等","id":"40","sourceUrl":"https://www.bilibili.com/video/BV1xxx040"},{"name":"木须肉","category":"家常菜","ingredients":["猪肉","鸡蛋","黄瓜","木耳"],"steps":["猪肉切片，鸡蛋打散","分别炒熟盛出","炒黄瓜木耳","倒入肉片鸡蛋翻炒均匀"],"time":20,"difficulty":"简单","id":"41","sourceUrl":"https://www.bilibili.com/video/BV1xxx041"},{"name":"地三鲜","category":"家常菜","ingredients":["土豆","茄子","青椒"],"steps":["土豆茄子切块炸熟","青椒切块","锅中炒香蒜末","倒入三鲜翻炒均匀"],"time":30,"difficulty":"中等","id":"42","sourceUrl":"https://www.bilibili.com/video/BV1xxx042"},{"name":"红烧茄子","category":"家常菜","ingredients":["茄子","青椒"],"steps":["茄子切条炸软","锅中炒香蒜末","加入茄子和料汁","翻炒均匀出锅"],"time":25,"difficulty":"简单","id":"43","sourceUrl":"https://www.bilibili.com/video/BV1xxx043"},{"name":"蒜蓉油麦菜","category":"家常菜","ingredients":["油麦菜","大蒜"],"steps":["油麦菜洗净切段","大蒜切末","锅中炒香蒜末","加入油麦菜快炒出锅"],"time":5,"difficulty":"简单","id":"44","sourceUrl":"https://www.bilibili.com/video/BV1xxx044"},{"name":"白灼菜心","category":"家常菜","ingredients":["菜心","大蒜"],"steps":["菜心洗净","开水焯烫至熟","捞出摆盘","淋上蒜茸豉油"],"time":10,"difficulty":"简单","id":"45","sourceUrl":"https://www.bilibili.com/video/BV1xxx045"},{"name":"干锅花菜","category":"家常菜","ingredients":["花菜","猪肉","干辣椒"],"steps":["花菜切小朵焯水","猪肉切片煸炒出油","爆香干辣椒","倒入花菜翻炒均匀"],"time":20,"difficulty":"中等","id":"46","sourceUrl":"https://www.bilibili.com/video/BV1xxx046"},{"name":"干锅土豆片","category":"家常菜","ingredients":["土豆","猪肉","青椒"],"steps":["土豆切片煎至金黄","猪肉切片煸炒","加入青椒翻炒","倒入土豆片炒匀"],"time":25,"difficulty":"中等","id":"47","sourceUrl":"https://www.bilibili.com/video/BV1xxx047"},{"name":"小炒黄牛肉","category":"家常菜","ingredients":["牛肉","香菜","小米辣"],"steps":["牛肉切片腌制","热锅快炒牛肉","加入香菜小米辣","翻炒均匀出锅"],"time":15,"difficulty":"中等","id":"48","sourceUrl":"https://www.bilibili.com/video/BV1xxx048"},{"name":"酸汤肥牛","category":"家常菜","ingredients":["牛肉","金针菇","酸豆角"],"steps":["牛肉切片","金针菇焯水铺底","煮酸汤放入牛肉","连汤倒入碗中"],"time":25,"difficulty":"中等","id":"49","sourceUrl":"https://www.bilibili.com/video/BV1xxx049"},{"name":"水煮鱼","category":"家常菜","ingredients":["鱼","白菜","干辣椒"],"steps":["鱼片腌制备用","白菜焯水铺底","煮鱼片至熟","撒上辣椒花椒泼热油"],"time":40,"difficulty":"中等","id":"50","sourceUrl":"https://www.bilibili.com/video/BV1xxx050"},{"name":"酸菜鱼","category":"家常菜","ingredients":["鱼","酸菜"],"steps":["鱼片腌制","酸菜炒香加水煮开","放入鱼片煮熟","撒上葱花出锅"],"time":40,"difficulty":"中等","id":"51","sourceUrl":"https://www.bilibili.com/video/BV1xxx051"},{"name":"剁椒鱼头","category":"家常菜","ingredients":["鱼","剁椒"],"steps":["鱼头处理干净","铺上剁椒","大火蒸15分钟","淋上热油"],"time":25,"difficulty":"中等","id":"52","sourceUrl":"https://www.bilibili.com/video/BV1xxx052"},{"name":"清蒸鲈鱼","category":"家常菜","ingredients":["鱼","小葱","生姜"],"steps":["鱼处理干净划刀","铺上葱姜","大火蒸12分钟","淋上蒸鱼豉油和热油"],"time":20,"difficulty":"简单","id":"53","sourceUrl":"https://www.bilibili.com/video/BV1xxx053"},{"name":"红烧带鱼","category":"家常菜","ingredients":["带鱼"],"steps":["带鱼切段煎至两面金黄","加入调料和开水","小火炖煮15分钟","大火收汁"],"time":30,"difficulty":"中等","id":"54","sourceUrl":"https://www.bilibili.com/video/BV1xxx054"},{"name":"香煎黄花鱼","category":"家常菜","ingredients":["黄花鱼"],"steps":["黄花鱼处理干净","两面煎至金黄","撒上盐和胡椒","挤上柠檬汁"],"time":20,"difficulty":"简单","id":"55","sourceUrl":"https://www.bilibili.com/video/BV1xxx055"},{"name":"油焖大虾","category":"家常菜","ingredients":["虾仁"],"steps":["虾仁开背去虾线","锅中倒油煎虾","加番茄酱和糖焖煮","大火收汁"],"time":20,"difficulty":"中等","id":"56","sourceUrl":"https://www.bilibili.com/video/BV1xxx056"},{"name":"蒜蓉粉丝蒸虾","category":"家常菜","ingredients":["虾仁","粉丝","大蒜"],"steps":["粉丝泡软铺底","虾仁摆在粉丝上","撒上蒜蓉","大火蒸8分钟"],"time":20,"difficulty":"简单","id":"57","sourceUrl":"https://www.bilibili.com/video/BV1xxx057"},{"name":"辣炒蛤蜊","category":"家常菜","ingredients":["蛤蜊","干辣椒"],"steps":["蛤蜊吐沙洗净","锅中爆香干辣椒","倒入蛤蜊翻炒至开口","撒上葱花"],"time":15,"difficulty":"简单","id":"58","sourceUrl":"https://www.bilibili.com/video/BV1xxx058"},{"name":"葱油鸡","category":"家常菜","ingredients":["鸡肉","小葱"],"steps":["鸡肉蒸熟","小葱切段炸葱油","鸡肉撕成丝","淋上葱油和酱油"],"time":30,"difficulty":"简单","id":"59","sourceUrl":"https://www.bilibili.com/video/BV1xxx059"},{"name":"口水鸡","category":"家常菜","ingredients":["鸡腿","花生","香菜"],"steps":["鸡腿煮熟切块","调制红油料汁","淋在鸡肉上","撒上花生香菜"],"time":30,"difficulty":"中等","id":"60","sourceUrl":"https://www.bilibili.com/video/BV1xxx060"},{"name":"夫妻肺片","category":"家常菜","ingredients":["牛肉","牛肚","花生"],"steps":["牛肉牛肚煮熟切片","调制红油料汁","淋在肉片上","撒上花生"],"time":40,"difficulty":"困难","id":"61","sourceUrl":"https://www.bilibili.com/video/BV1xxx061"},{"name":"蒜泥白肉","category":"家常菜","ingredients":["五花肉","黄瓜","大蒜"],"steps":["五花肉煮熟切片","黄瓜切片铺底","调制蒜泥料汁","淋在肉片上"],"time":35,"difficulty":"中等","id":"62","sourceUrl":"https://www.bilibili.com/video/BV1xxx062"},{"name":"梅菜扣肉","category":"家常菜","ingredients":["五花肉","梅干菜"],"steps":["五花肉煮熟炸皮","切片码入碗中","铺上梅干菜","蒸1小时倒扣"],"time":90,"difficulty":"困难","id":"63","sourceUrl":"https://www.bilibili.com/video/BV1xxx063"},{"name":"粉蒸肉","category":"家常菜","ingredients":["五花肉","米粉"],"steps":["五花肉切片腌制","裹上米粉","放入蒸锅蒸1小时","撒上葱花"],"time":70,"difficulty":"中等","id":"64","sourceUrl":"https://www.bilibili.com/video/BV1xxx064"},{"name":"狮子头","category":"家常菜","ingredients":["肉末","荸荠"],"steps":["肉末加荸荠调味","团成大肉丸","炸至定型","加水炖煮30分钟"],"time":60,"difficulty":"中等","id":"65","sourceUrl":"https://www.bilibili.com/video/BV1xxx065"},{"name":"四喜丸子","category":"家常菜","ingredients":["肉末","荸荠"],"steps":["肉末加荸荠调味","团成四个大肉丸","炸至定型","红烧炖煮"],"time":60,"difficulty":"中等","id":"66","sourceUrl":"https://www.bilibili.com/video/BV1xxx066"},{"name":"京酱肉丝","category":"家常菜","ingredients":["猪肉","大葱","豆皮"],"steps":["猪肉切丝腌制","热锅滑炒肉丝","加甜面酱炒匀","用豆皮卷大葱肉丝"],"time":25,"difficulty":"中等","id":"67","sourceUrl":"https://www.bilibili.com/video/BV1xxx067"},{"name":"糖醋里脊","category":"家常菜","ingredients":["猪肉"],"steps":["猪肉切条腌制","裹粉炸至金黄","调糖醋汁","翻炒均匀"],"time":30,"difficulty":"中等","id":"68","sourceUrl":"https://www.bilibili.com/video/BV1xxx068"},{"name":"锅包肉","category":"家常菜","ingredients":["猪肉"],"steps":["猪肉切片腌制","裹粉炸至金黄","调酸甜汁","快速翻炒挂汁"],"time":35,"difficulty":"中等","id":"69","sourceUrl":"https://www.bilibili.com/video/BV1xxx069"},{"name":"溜肉段","category":"家常菜","ingredients":["猪肉","青椒"],"steps":["猪肉切块腌制","裹粉炸至金黄","调溜汁","倒入青椒肉段翻炒"],"time":30,"difficulty":"中等","id":"70","sourceUrl":"https://www.bilibili.com/video/BV1xxx070"},{"name":"软炸里脊","category":"家常菜","ingredients":["猪肉"],"steps":["猪肉切条腌制","挂软炸糊","中小火炸至金黄","撒上椒盐"],"time":25,"difficulty":"简单","id":"71","sourceUrl":"https://www.bilibili.com/video/BV1xxx071"},{"name":"炸酥肉","category":"家常菜","ingredients":["五花肉"],"steps":["五花肉切条腌制","挂糊炸至金黄","复炸一次更酥","撒上椒盐"],"time":30,"difficulty":"简单","id":"72","sourceUrl":"https://www.bilibili.com/video/BV1xxx072"},{"name":"牙签肉","category":"家常菜","ingredients":["猪肉","干辣椒","孜然"],"steps":["猪肉切丁腌制","用牙签串起","炸至金黄","撒上孜然辣椒"],"time":30,"difficulty":"中等","id":"73","sourceUrl":"https://www.bilibili.com/video/BV1xxx073"},{"name":"可乐排骨","category":"家常菜","ingredients":["排骨"],"steps":["排骨焯水","煎至表面微焦","倒入可乐","小火焖煮收汁"],"time":55,"difficulty":"中等","id":"74","sourceUrl":"https://www.bilibili.com/video/BV1xxx074"},{"name":"蜜汁叉烧","category":"家常菜","ingredients":["猪肉"],"steps":["猪肉切条腌制","刷上蜜汁","烤箱烤至金黄","切片装盘"],"time":50,"difficulty":"中等","id":"75","sourceUrl":"https://www.bilibili.com/video/BV1xxx075"},{"name":"蜜汁鸡翅","category":"家常菜","ingredients":["鸡翅"],"steps":["鸡翅腌制","刷上蜜汁","烤箱烤至金黄","撒上芝麻"],"time":40,"difficulty":"简单","id":"76","sourceUrl":"https://www.bilibili.com/video/BV1xxx076"},{"name":"奥尔良烤翅","category":"家常菜","ingredients":["鸡翅"],"steps":["鸡翅用奥尔良腌料腌制","放入烤箱","烤至金黄熟透","撒上芝麻"],"time":35,"difficulty":"简单","id":"77","sourceUrl":"https://www.bilibili.com/video/BV1xxx077"},{"name":"盐焗鸡","category":"家常菜","ingredients":["鸡肉"],"steps":["鸡肉抹盐焗粉腌制","放入电饭煲","焗至熟透","撕成丝装盘"],"time":40,"difficulty":"中等","id":"78","sourceUrl":"https://www.bilibili.com/video/BV1xxx078"},{"name":"白切鸡","category":"家常菜","ingredients":["鸡肉"],"steps":["鸡肉整只煮熟","捞出过冰水","切块摆盘","配姜葱蘸料"],"time":40,"difficulty":"中等","id":"79","sourceUrl":"https://www.bilibili.com/video/BV1xxx079"},{"name":"酱油鸡","category":"家常菜","ingredients":["鸡肉"],"steps":["鸡肉整只下锅","加酱油和香料煮","翻面煮至熟透","切块装盘"],"time":45,"difficulty":"中等","id":"80","sourceUrl":"https://www.bilibili.com/video/BV1xxx080"},{"name":"姜葱炒蟹","category":"家常菜","ingredients":["蟹","生姜","大葱"],"steps":["蟹处理干净切块","锅中爆香姜葱","倒入蟹翻炒","加盖焖煮至熟"],"time":30,"difficulty":"中等","id":"81","sourceUrl":"https://www.bilibili.com/video/BV1xxx081"},{"name":"蒜蓉蒸扇贝","category":"家常菜","ingredients":["扇贝","大蒜"],"steps":["扇贝处理干净","铺上蒜蓉","大火蒸5分钟","淋上热油"],"time":15,"difficulty":"简单","id":"82","sourceUrl":"https://www.bilibili.com/video/BV1xxx082"},{"name":"粉丝蒸扇贝","category":"家常菜","ingredients":["扇贝","粉丝","大蒜"],"steps":["粉丝泡软铺在扇贝上","撒上蒜蓉","大火蒸5分钟","淋上热油"],"time":15,"difficulty":"简单","id":"83","sourceUrl":"https://www.bilibili.com/video/BV1xxx083"},{"name":"红烧猪蹄","category":"家常菜","ingredients":["猪蹄"],"steps":["猪蹄焯水","锅中煸炒","加调料和开水炖煮","大火收汁"],"time":90,"difficulty":"中等","id":"84","sourceUrl":"https://www.bilibili.com/video/BV1xxx084"},{"name":"黄豆炖猪蹄","category":"家常菜","ingredients":["猪蹄","黄豆"],"steps":["猪蹄焯水，黄豆泡发","一起加水炖煮","小火炖1.5小时","加盐调味"],"time":100,"difficulty":"中等","id":"85","sourceUrl":"https://www.bilibili.com/video/BV1xxx085"},{"name":"猪肚汤","category":"家常菜","ingredients":["猪肚","莲子","胡椒"],"steps":["猪肚洗净焯水","加莲子和胡椒炖煮","小火炖1小时","切片加盐调味"],"time":80,"difficulty":"中等","id":"86","sourceUrl":"https://www.bilibili.com/video/BV1xxx086"},{"name":"爆炒腰花","category":"家常菜","ingredients":["猪腰","青椒","洋葱"],"steps":["猪腰切花刀","焯水去腥","热锅快炒","加入青椒洋葱翻炒"],"time":20,"difficulty":"中等","id":"87","sourceUrl":"https://www.bilibili.com/video/BV1xxx087"},{"name":"溜肝尖","category":"家常菜","ingredients":["猪肝","青椒","洋葱"],"steps":["猪肝切片腌制","焯水去血","热锅快炒","加入配菜翻炒"],"time":20,"difficulty":"中等","id":"88","sourceUrl":"https://www.bilibili.com/video/BV1xxx088"},{"name":"泡椒凤爪","category":"家常菜","ingredients":["鸡爪","泡椒"],"steps":["鸡爪剪去指甲","煮熟过冰水","泡入泡椒水中","冷藏入味"],"time":120,"difficulty":"中等","id":"89","sourceUrl":"https://www.bilibili.com/video/BV1xxx089"},{"name":"卤鸡爪","category":"家常菜","ingredients":["鸡爪"],"steps":["鸡爪剪去指甲焯水","放入卤水中","小火卤煮30分钟","浸泡入味"],"time":50,"difficulty":"中等","id":"90","sourceUrl":"https://www.bilibili.com/video/BV1xxx090"},{"name":"可乐鸡腿","category":"家常菜","ingredients":["鸡腿"],"steps":["鸡腿划刀焯水","煎至两面金黄","倒入可乐","小火焖煮收汁"],"time":40,"difficulty":"简单","id":"91","sourceUrl":"https://www.bilibili.com/video/BV1xxx091"},{"name":"照烧鸡腿","category":"家常菜","ingredients":["鸡腿"],"steps":["鸡腿去骨腌制","煎至两面金黄","倒入照烧汁","小火焖煮收汁"],"time":30,"difficulty":"简单","id":"92","sourceUrl":"https://www.bilibili.com/video/BV1xxx092"},{"name":"黄焖鸡","category":"家常菜","ingredients":["鸡肉","土豆","青椒","香菇"],"steps":["鸡肉切块腌制","锅中炒香鸡肉","加入土豆香菇炖煮","放入青椒收汁"],"time":40,"difficulty":"中等","id":"93","sourceUrl":"https://www.bilibili.com/video/BV1xxx093"},{"name":"新疆大盘鸡","category":"家常菜","ingredients":["鸡肉","土豆","面条"],"steps":["鸡肉切块炒香","加入土豆炖煮","放入面条焖熟","拌匀出锅"],"time":50,"difficulty":"中等","id":"94","sourceUrl":"https://www.bilibili.com/video/BV1xxx094"},{"name":"啤酒鱼","category":"家常菜","ingredients":["鱼","啤酒","青椒"],"steps":["鱼煎至两面金黄","倒入啤酒","加入青椒炖煮","大火收汁"],"time":35,"difficulty":"中等","id":"95","sourceUrl":"https://www.bilibili.com/video/BV1xxx095"},{"name":"干烧鱼","category":"家常菜","ingredients":["鱼","肉末","泡椒"],"steps":["鱼煎至两面金黄","锅中炒香肉末泡椒","倒入鱼上焖煮","大火收汁"],"time":35,"difficulty":"中等","id":"96","sourceUrl":"https://www.bilibili.com/video/BV1xxx096"},{"name":"松鼠鳜鱼","category":"家常菜","ingredients":["鱼"],"steps":["鱼处理干净切花刀","裹粉炸至金黄","调番茄汁","淋在鱼上"],"time":40,"difficulty":"困难","id":"97","sourceUrl":"https://www.bilibili.com/video/BV1xxx097"},{"name":"水煮牛肉","category":"川菜","ingredients":["牛肉","白菜","干辣椒"],"steps":["牛肉切片腌制","白菜焯水铺底","煮牛肉至熟","撒上辣椒花椒泼热油"],"time":30,"difficulty":"中等","id":"98","sourceUrl":"https://www.bilibili.com/video/BV1xxx098"},{"name":"麻辣香锅","category":"川菜","ingredients":["虾仁","莲藕","土豆","香菇"],"steps":["各种食材焯水或炸熟","锅中炒香火锅底料","倒入食材翻炒","撒上芝麻"],"time":30,"difficulty":"中等","id":"99","sourceUrl":"https://www.bilibili.com/video/BV1xxx099"},{"name":"毛血旺","category":"川菜","ingredients":["鸭血","毛肚","豆芽"],"steps":["鸭血毛肚焯水","豆芽铺底","煮麻辣汤底","倒入食材撒上辣椒"],"time":35,"difficulty":"中等","id":"100","sourceUrl":"https://www.bilibili.com/video/BV1xxx100"},{"name":"辣子鸡","category":"川菜","ingredients":["鸡肉","干辣椒","花椒"],"steps":["鸡肉切丁腌制","炸至金黄","爆香干辣椒花椒","倒入鸡丁翻炒"],"time":30,"difficulty":"中等","id":"101","sourceUrl":"https://www.bilibili.com/video/BV1xxx101"},{"name":"麻辣小龙虾","category":"川菜","ingredients":["小龙虾","干辣椒","花椒"],"steps":["小龙虾刷洗干净","过油","炒香火锅底料和干辣椒","倒入小龙虾焖煮"],"time":40,"difficulty":"中等","id":"102","sourceUrl":"https://www.bilibili.com/video/BV1xxx102"},{"name":"泡椒牛蛙","category":"川菜","ingredients":["牛蛙","泡椒","莴笋"],"steps":["牛蛙切块腌制","莴笋切块","锅中炒香泡椒","倒入牛蛙煮熟"],"time":30,"difficulty":"中等","id":"103","sourceUrl":"https://www.bilibili.com/video/BV1xxx103"},{"name":"酸菜肥肠","category":"川菜","ingredients":["肥肠","酸菜"],"steps":["肥肠洗净焯水","酸菜炒香","加入肥肠翻炒","加水炖煮入味"],"time":50,"difficulty":"中等","id":"104","sourceUrl":"https://www.bilibili.com/video/BV1xxx104"},{"name":"干煸肥肠","category":"川菜","ingredients":["肥肠","干辣椒","花椒"],"steps":["肥肠煮熟切段","干煸至微焦","爆香干辣椒花椒","倒入肥肠翻炒"],"time":40,"difficulty":"中等","id":"105","sourceUrl":"https://www.bilibili.com/video/BV1xxx105"},{"name":"担担面","category":"川菜","ingredients":["面条","肉末","芽菜"],"steps":["肉末炒香","芽菜切碎","调红油汤底","面条煮熟拌匀"],"time":20,"difficulty":"中等","id":"106","sourceUrl":"https://www.bilibili.com/video/BV1xxx106"},{"name":"酸辣粉","category":"川菜","ingredients":["粉丝","肉末","花生"],"steps":["粉丝泡软","肉末炒香","调酸辣汤底","浇在粉丝上"],"time":20,"difficulty":"简单","id":"107","sourceUrl":"https://www.bilibili.com/video/BV1xxx107"},{"name":"钵钵鸡","category":"川菜","ingredients":["鸡肉","土豆","木耳","莲藕"],"steps":["食材煮熟串起","调制红油汤底","浸泡入味","撒上芝麻"],"time":60,"difficulty":"中等","id":"108","sourceUrl":"https://www.bilibili.com/video/BV1xxx108"},{"name":"串串香","category":"川菜","ingredients":["牛肉","土豆","豆皮"],"steps":["食材切片串起","煮熟","蘸干碟或油碟","即可食用"],"time":40,"difficulty":"中等","id":"109","sourceUrl":"https://www.bilibili.com/video/BV1xxx109"},{"name":"鱼香茄子","category":"川菜","ingredients":["茄子","肉末"],"steps":["茄子切条炸软","锅中炒香肉末","加入鱼香汁","倒入茄子炒匀"],"time":25,"difficulty":"简单","id":"110","sourceUrl":"https://www.bilibili.com/video/BV1xxx110"},{"name":"鱼香烘蛋","category":"川菜","ingredients":["鸡蛋"],"steps":["鸡蛋打散","煎至两面金黄","倒入鱼香汁","小火焖煮入味"],"time":15,"difficulty":"简单","id":"111","sourceUrl":"https://www.bilibili.com/video/BV1xxx111"},{"name":"豆瓣鱼","category":"川菜","ingredients":["鱼","豆瓣酱"],"steps":["鱼煎至两面金黄","锅中炒香豆瓣酱","倒入开水煮鱼","大火收汁"],"time":30,"difficulty":"中等","id":"112","sourceUrl":"https://www.bilibili.com/video/BV1xxx112"},{"name":"红烧鳝鱼","category":"川菜","ingredients":["鳝鱼","泡椒"],"steps":["鳝鱼处理干净切段","锅中爆香泡椒","倒入鳝鱼翻炒","加水炖煮"],"time":35,"difficulty":"中等","id":"113","sourceUrl":"https://www.bilibili.com/video/BV1xxx113"},{"name":"麻辣兔丁","category":"川菜","ingredients":["兔肉","干辣椒","花椒"],"steps":["兔肉切丁腌制","炸至金黄","爆香干辣椒花椒","倒入兔丁翻炒"],"time":35,"difficulty":"中等","id":"114","sourceUrl":"https://www.bilibili.com/video/BV1xxx114"},{"name":"冷吃兔","category":"川菜","ingredients":["兔肉","干辣椒","花椒"],"steps":["兔肉切丁腌制","油炸至干香","加入辣椒花椒炒制","放凉入味"],"time":45,"difficulty":"中等","id":"115","sourceUrl":"https://www.bilibili.com/video/BV1xxx115"},{"name":"宫保虾球","category":"川菜","ingredients":["虾仁","花生","干辣椒"],"steps":["虾仁腌制","炸至金黄","爆香干辣椒","倒入虾球翻炒"],"time":25,"difficulty":"中等","id":"116","sourceUrl":"https://www.bilibili.com/video/BV1xxx116"},{"name":"干锅虾","category":"川菜","ingredients":["虾仁","土豆","莲藕"],"steps":["虾开背炸熟","土豆藕片炸熟","炒香干锅底料","倒入食材翻炒"],"time":30,"difficulty":"中等","id":"117","sourceUrl":"https://www.bilibili.com/video/BV1xxx117"},{"name":"香辣蟹","category":"川菜","ingredients":["蟹","干辣椒","花椒"],"steps":["蟹处理干净切块","过油","炒香辣椒花椒","倒入蟹翻炒"],"time":35,"difficulty":"中等","id":"118","sourceUrl":"https://www.bilibili.com/video/BV1xxx118"},{"name":"馋嘴蛙","category":"川菜","ingredients":["牛蛙","莴笋","泡椒"],"steps":["牛蛙切块腌制","莴笋焯水铺底","煮牛蛙连汤倒入","撒上辣椒泼油"],"time":30,"difficulty":"中等","id":"119","sourceUrl":"https://www.bilibili.com/video/BV1xxx119"},{"name":"冒菜","category":"川菜","ingredients":["牛肉","土豆","豆皮","白菜"],"steps":["各种食材煮熟","调麻辣汤底","倒入食材","撒上香菜"],"time":30,"difficulty":"简单","id":"120","sourceUrl":"https://www.bilibili.com/video/BV1xxx120"},{"name":"麻辣烫","category":"川菜","ingredients":["白菜","豆腐","粉丝","蘑菇"],"steps":["各种食材串起","煮麻辣汤底","烫熟食材","蘸料食用"],"time":25,"difficulty":"简单","id":"121","sourceUrl":"https://www.bilibili.com/video/BV1xxx121"},{"name":"蒜泥黄瓜","category":"川菜","ingredients":["黄瓜","大蒜"],"steps":["黄瓜拍碎切段","大蒜捣成泥","加入调料拌匀","腌制入味"],"time":10,"difficulty":"简单","id":"122","sourceUrl":"https://www.bilibili.com/video/BV1xxx122"},{"name":"拍黄瓜","category":"川菜","ingredients":["黄瓜","大蒜"],"steps":["黄瓜拍碎","切段","加蒜泥调料拌匀","腌制10分钟"],"time":10,"difficulty":"简单","id":"123","sourceUrl":"https://www.bilibili.com/video/BV1xxx123"},{"name":"凉拌木耳","category":"川菜","ingredients":["木耳","黄瓜"],"steps":["木耳泡发焯水","黄瓜切片","加入调料拌匀","撒上香菜"],"time":10,"difficulty":"简单","id":"124","sourceUrl":"https://www.bilibili.com/video/BV1xxx124"},{"name":"凉拌海带丝","category":"川菜","ingredients":["海带","大蒜"],"steps":["海带泡发切丝","焯水","加入蒜泥调料拌匀","撒上芝麻"],"time":10,"difficulty":"简单","id":"125","sourceUrl":"https://www.bilibili.com/video/BV1xxx125"},{"name":"红油耳片","category":"川菜","ingredients":["猪耳","黄瓜"],"steps":["猪耳煮熟切片","黄瓜切片","淋上红油料汁","拌匀"],"time":20,"difficulty":"中等","id":"126","sourceUrl":"https://www.bilibili.com/video/BV1xxx126"},{"name":"藤椒鸡","category":"川菜","ingredients":["鸡肉","藤椒"],"steps":["鸡肉煮熟","调藤椒料汁","浸泡鸡肉","撒上葱花"],"time":35,"difficulty":"中等","id":"127","sourceUrl":"https://www.bilibili.com/video/BV1xxx127"},{"name":"花椒鸡","category":"川菜","ingredients":["鸡肉","花椒"],"steps":["鸡肉切块炒香","加入大量花椒","加水炖煮","麻辣入味"],"time":40,"difficulty":"中等","id":"128","sourceUrl":"https://www.bilibili.com/video/BV1xxx128"},{"name":"辣子肥肠","category":"川菜","ingredients":["肥肠","干辣椒"],"steps":["肥肠煮熟切段","干煸至焦香","加入干辣椒翻炒","撒上芝麻"],"time":40,"difficulty":"中等","id":"129","sourceUrl":"https://www.bilibili.com/video/BV1xxx129"},{"name":"火爆腰花","category":"川菜","ingredients":["猪腰","泡椒","莴笋"],"steps":["猪腰切花刀","焯水去腥","热锅快炒","加入泡椒莴笋"],"time":20,"difficulty":"中等","id":"130","sourceUrl":"https://www.bilibili.com/video/BV1xxx130"},{"name":"肝腰合炒","category":"川菜","ingredients":["猪肝","猪腰","泡椒"],"steps":["猪肝猪腰切片腌制","焯水","热锅快炒","加泡椒炒匀"],"time":20,"difficulty":"中等","id":"131","sourceUrl":"https://www.bilibili.com/video/BV1xxx131"},{"name":"盐煎肉","category":"川菜","ingredients":["五花肉","青椒"],"steps":["五花肉切片","干煸出油","加入青椒翻炒","加豆瓣酱调味"],"time":20,"difficulty":"中等","id":"132","sourceUrl":"https://www.bilibili.com/video/BV1xxx132"},{"name":"生爆盐煎肉","category":"川菜","ingredients":["猪肉","蒜苗"],"steps":["猪肉切片","干煸出油","加入蒜苗翻炒","调味出锅"],"time":15,"difficulty":"中等","id":"133","sourceUrl":"https://www.bilibili.com/video/BV1xxx133"},{"name":"青椒回锅肉","category":"川菜","ingredients":["五花肉","青椒"],"steps":["五花肉煮熟切片","干煸出油","加入青椒翻炒","调味出锅"],"time":20,"difficulty":"中等","id":"134","sourceUrl":"https://www.bilibili.com/video/BV1xxx134"},{"name":"蒜苗回锅肉","category":"川菜","ingredients":["五花肉","蒜苗"],"steps":["五花肉煮熟切片","干煸出油","加入蒜苗翻炒","调味出锅"],"time":20,"difficulty":"中等","id":"135","sourceUrl":"https://www.bilibili.com/video/BV1xxx135"},{"name":"鱼香肉丝","category":"川菜","ingredients":["猪肉","木耳","胡萝卜","青椒"],"steps":["猪肉切丝腌制","配菜切丝","热锅炒肉丝","加鱼香汁炒匀"],"time":25,"difficulty":"中等","id":"136","sourceUrl":"https://www.bilibili.com/video/BV1xxx136"},{"name":"鱼香茄子煲","category":"川菜","ingredients":["茄子","肉末"],"steps":["茄子炸软","炒香肉末","加鱼香汁","倒入砂锅煲煮"],"time":30,"difficulty":"中等","id":"137","sourceUrl":"https://www.bilibili.com/video/BV1xxx137"},{"name":"蚂蚁上树","category":"川菜","ingredients":["粉丝","肉末"],"steps":["粉丝泡软","肉末炒香","加入调料和水","放入粉丝焖煮"],"time":20,"difficulty":"简单","id":"138","sourceUrl":"https://www.bilibili.com/video/BV1xxx138"},{"name":"家常豆腐","category":"川菜","ingredients":["豆腐","青椒","木耳"],"steps":["豆腐切块煎黄","炒青椒木耳","倒入豆腐和料汁","翻炒均匀"],"time":20,"difficulty":"简单","id":"139","sourceUrl":"https://www.bilibili.com/video/BV1xxx139"},{"name":"熊掌豆腐","category":"川菜","ingredients":["豆腐","肉末"],"steps":["豆腐切块煎至金黄","炒香肉末","加入调料炖煮","大火收汁"],"time":25,"difficulty":"中等","id":"140","sourceUrl":"https://www.bilibili.com/video/BV1xxx140"},{"name":"酸辣汤","category":"川菜","ingredients":["豆腐","木耳","鸡蛋"],"steps":["豆腐木耳切丝","加水煮开","倒入蛋液","加醋和胡椒调味"],"time":15,"difficulty":"简单","id":"141","sourceUrl":"https://www.bilibili.com/video/BV1xxx141"},{"name":"连锅汤","category":"川菜","ingredients":["猪肉","白萝卜"],"steps":["猪肉煮熟切片","白萝卜煮软","连汤盛入碗中","蘸料食用"],"time":50,"difficulty":"简单","id":"142","sourceUrl":"https://www.bilibili.com/video/BV1xxx142"},{"name":"烧鹅","category":"粤菜","ingredients":["鹅肉"],"steps":["鹅处理干净","腌制","风干","烤至皮脆"],"time":120,"difficulty":"困难","id":"143","sourceUrl":"https://www.bilibili.com/video/BV1xxx143"},{"name":"脆皮烧肉","category":"粤菜","ingredients":["五花肉"],"steps":["五花肉腌制","烤至皮脆","切块","蘸芥末酱油"],"time":90,"difficulty":"困难","id":"144","sourceUrl":"https://www.bilibili.com/video/BV1xxx144"},{"name":"豉油鸡","category":"粤菜","ingredients":["鸡肉"],"steps":["鸡整只下锅","加豉油和香料煮","翻面煮熟","切块"],"time":45,"difficulty":"中等","id":"145","sourceUrl":"https://www.bilibili.com/video/BV1xxx145"},{"name":"姜葱焗鸡","category":"粤菜","ingredients":["鸡肉","生姜","大葱"],"steps":["鸡肉切块","爆香姜葱","倒入鸡肉焗煮","收汁出锅"],"time":35,"difficulty":"中等","id":"146","sourceUrl":"https://www.bilibili.com/video/BV1xxx146"},{"name":"清蒸石斑鱼","category":"粤菜","ingredients":["鱼","小葱","生姜"],"steps":["鱼处理干净","铺葱姜","大火蒸12分钟","淋豉油热油"],"time":20,"difficulty":"简单","id":"147","sourceUrl":"https://www.bilibili.com/video/BV1xxx147"},{"name":"白灼虾","category":"粤菜","ingredients":["虾仁"],"steps":["虾洗净","开水焯烫变红","捞出","蘸姜醋汁"],"time":10,"difficulty":"简单","id":"148","sourceUrl":"https://www.bilibili.com/video/BV1xxx148"},{"name":"蒜蓉蒸虾","category":"粤菜","ingredients":["虾仁","大蒜"],"steps":["虾开背去虾线","铺蒜蓉","大火蒸5分钟","淋热油"],"time":15,"difficulty":"简单","id":"149","sourceUrl":"https://www.bilibili.com/video/BV1xxx149"},{"name":"蚝油牛肉","category":"粤菜","ingredients":["牛肉","芥蓝"],"steps":["牛肉切片腌制","芥蓝焯水","快炒牛肉","淋蚝油炒匀"],"time":20,"difficulty":"中等","id":"150","sourceUrl":"https://www.bilibili.com/video/BV1xxx150"},{"name":"黑椒牛柳","category":"粤菜","ingredients":["牛肉","青椒","洋葱"],"steps":["牛肉切条腌制","煎至变色","加入青椒洋葱","加黑椒汁炒匀"],"time":20,"difficulty":"中等","id":"151","sourceUrl":"https://www.bilibili.com/video/BV1xxx151"},{"name":"菠萝咕噜肉","category":"粤菜","ingredients":["猪肉","菠萝","青椒"],"steps":["猪肉切块炸黄","菠萝青椒切块","调酸甜汁","翻炒均匀"],"time":35,"difficulty":"中等","id":"152","sourceUrl":"https://www.bilibili.com/video/BV1xxx152"},{"name":"滑蛋虾仁","category":"粤菜","ingredients":["虾仁","鸡蛋"],"steps":["虾仁焯水","鸡蛋打散加牛奶","热锅倒入蛋液","半熟时加入虾仁"],"time":15,"difficulty":"简单","id":"153","sourceUrl":"https://www.bilibili.com/video/BV1xxx153"},{"name":"干炒牛河","category":"粤菜","ingredients":["河粉","牛肉","豆芽"],"steps":["牛肉切片腌制","河粉焯水","热锅快炒","加入牛肉豆芽炒匀"],"time":15,"difficulty":"中等","id":"154","sourceUrl":"https://www.bilibili.com/video/BV1xxx154"},{"name":"湿炒牛河","category":"粤菜","ingredients":["河粉","牛肉","芥蓝"],"steps":["牛肉腌制","河粉煎香","炒芥蓝牛肉","勾芡淋在河粉上"],"time":20,"difficulty":"中等","id":"155","sourceUrl":"https://www.bilibili.com/video/BV1xxx155"},{"name":"虾饺","category":"粤菜","ingredients":["虾仁","猪肉","饺子皮"],"steps":["虾仁猪肉剁馅","包成虾饺","大火蒸8分钟","即可食用"],"time":40,"difficulty":"中等","id":"156","sourceUrl":"https://www.bilibili.com/video/BV1xxx156"},{"name":"烧卖","category":"粤菜","ingredients":["猪肉","虾仁","饺子皮"],"steps":["猪肉虾仁剁馅","包成烧卖","大火蒸10分钟","即可食用"],"time":35,"difficulty":"中等","id":"157","sourceUrl":"https://www.bilibili.com/video/BV1xxx157"},{"name":"叉烧包","category":"粤菜","ingredients":["面粉","猪肉"],"steps":["面粉发酵","猪肉做成叉烧馅","包成包子","蒸熟"],"time":90,"difficulty":"困难","id":"158","sourceUrl":"https://www.bilibili.com/video/BV1xxx158"},{"name":"蛋挞","category":"粤菜","ingredients":["面粉","鸡蛋","牛奶"],"steps":["面粉做挞皮","调蛋奶液","倒入挞皮","烤至金黄"],"time":40,"difficulty":"中等","id":"159","sourceUrl":"https://www.bilibili.com/video/BV1xxx159"},{"name":"蒸排骨","category":"粤菜","ingredients":["排骨","豆豉","大蒜"],"steps":["排骨剁块腌制","加豆豉蒜蓉","大火蒸20分钟","撒上葱花"],"time":30,"difficulty":"简单","id":"160","sourceUrl":"https://www.bilibili.com/video/BV1xxx160"},{"name":"蒸凤爪","category":"粤菜","ingredients":["鸡爪","豆豉"],"steps":["鸡爪炸后泡水","加豆豉调料","大火蒸30分钟","软烂入味"],"time":60,"difficulty":"中等","id":"161","sourceUrl":"https://www.bilibili.com/video/BV1xxx161"},{"name":"煲仔饭","category":"粤菜","ingredients":["米饭","腊肉","香肠"],"steps":["米饭煮至八分熟","铺腊味","小火焖熟","淋酱油"],"time":35,"difficulty":"中等","id":"162","sourceUrl":"https://www.bilibili.com/video/BV1xxx162"},{"name":"腊味煲仔饭","category":"粤菜","ingredients":["米饭","腊肉","香肠"],"steps":["米饭加水煮","铺腊味","小火焖煮","淋调味汁"],"time":35,"difficulty":"中等","id":"163","sourceUrl":"https://www.bilibili.com/video/BV1xxx163"},{"name":"牛腩煲","category":"粤菜","ingredients":["牛肉","白萝卜"],"steps":["牛肉切块炖煮","加入白萝卜","小火炖至软烂","撒上葱花"],"time":90,"difficulty":"中等","id":"164","sourceUrl":"https://www.bilibili.com/video/BV1xxx164"},{"name":"萝卜牛杂","category":"粤菜","ingredients":["牛杂","白萝卜"],"steps":["牛杂处理干净","白萝卜切块","一起炖煮","蘸料食用"],"time":90,"difficulty":"中等","id":"165","sourceUrl":"https://www.bilibili.com/video/BV1xxx165"},{"name":"及第粥","category":"粤菜","ingredients":["米饭","猪肉","猪肝"],"steps":["米煮成粥","猪肉猪肝切片","放入粥中煮熟","调味撒上葱花"],"time":40,"difficulty":"简单","id":"166","sourceUrl":"https://www.bilibili.com/video/BV1xxx166"},{"name":"皮蛋瘦肉粥","category":"粤菜","ingredients":["米饭","猪肉","皮蛋"],"steps":["米煮成粥","猪肉切丝","加入皮蛋和肉丝","调味出锅"],"time":40,"difficulty":"简单","id":"167","sourceUrl":"https://www.bilibili.com/video/BV1xxx167"},{"name":"艇仔粥","category":"粤菜","ingredients":["米饭","虾仁","鱼"],"steps":["米煮成粥","加入虾仁鱼片","煮熟调味","撒上葱花"],"time":40,"difficulty":"中等","id":"168","sourceUrl":"https://www.bilibili.com/video/BV1xxx168"},{"name":"云吞面","category":"粤菜","ingredients":["面条","猪肉","虾仁","馄饨皮"],"steps":["包云吞","煮面条","煮云吞","连汤盛入碗中"],"time":40,"difficulty":"中等","id":"169","sourceUrl":"https://www.bilibili.com/video/BV1xxx169"},{"name":"竹升面","category":"粤菜","ingredients":["面条","虾子"],"steps":["面条煮熟","过冷水","拌入虾子和葱油","即可食用"],"time":15,"difficulty":"简单","id":"170","sourceUrl":"https://www.bilibili.com/video/BV1xxx170"},{"name":"肠粉","category":"粤菜","ingredients":["大米粉","猪肉","鸡蛋"],"steps":["米浆摊平蒸熟","加入肉末鸡蛋","卷起切段","淋酱油"],"time":30,"difficulty":"中等","id":"171","sourceUrl":"https://www.bilibili.com/video/BV1xxx171"},{"name":"萝卜糕","category":"粤菜","ingredients":["白萝卜","粘米粉","腊肉"],"steps":["萝卜刨丝煮软","加入粘米粉浆","放入腊肉丁","蒸熟切块煎香"],"time":60,"difficulty":"中等","id":"172","sourceUrl":"https://www.bilibili.com/video/BV1xxx172"},{"name":"马蹄糕","category":"粤菜","ingredients":["荸荠","马蹄粉","糖"],"steps":["荸荠切碎","马蹄粉加水调浆","加糖煮化","蒸熟切块"],"time":50,"difficulty":"中等","id":"173","sourceUrl":"https://www.bilibili.com/video/BV1xxx173"},{"name":"双皮奶","category":"粤菜","ingredients":["牛奶","鸡蛋"],"steps":["牛奶煮开晾凉成皮","加入蛋清液","过滤后蒸","冷藏后食用"],"time":40,"difficulty":"中等","id":"174","sourceUrl":"https://www.bilibili.com/video/BV1xxx174"},{"name":"姜撞奶","category":"粤菜","ingredients":["牛奶","生姜"],"steps":["生姜榨汁","牛奶加热至70度","冲入姜汁","静置凝固"],"time":20,"difficulty":"简单","id":"175","sourceUrl":"https://www.bilibili.com/video/BV1xxx175"},{"name":"杨枝甘露","category":"粤菜","ingredients":["芒果","西米","椰奶"],"steps":["西米煮熟过冷水","芒果打成泥","加入椰奶和西米","拌匀冷藏"],"time":30,"difficulty":"简单","id":"176","sourceUrl":"https://www.bilibili.com/video/BV1xxx176"},{"name":"老火靓汤","category":"粤菜","ingredients":["猪肉","玉米","胡萝卜"],"steps":["食材处理干净","一起加水","小火煲2小时","加盐调味"],"time":130,"difficulty":"简单","id":"177","sourceUrl":"https://www.bilibili.com/video/BV1xxx177"},{"name":"花旗参乌鸡汤","category":"粤菜","ingredients":["鸡肉","花旗参"],"steps":["乌鸡处理干净","加入花旗参","小火煲1.5小时","加盐调味"],"time":100,"difficulty":"简单","id":"178","sourceUrl":"https://www.bilibili.com/video/BV1xxx178"},{"name":"辣椒炒肉","category":"湘菜","ingredients":["猪肉","青椒"],"steps":["猪肉切片，青椒切块","热锅炒肉出油","加入青椒爆炒","调味出锅"],"time":15,"difficulty":"简单","id":"179","sourceUrl":"https://www.bilibili.com/video/BV1xxx179"},{"name":"湘西外婆菜","category":"湘菜","ingredients":["雪菜","肉末"],"steps":["外婆菜洗净","肉末炒香","加入外婆菜翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"180","sourceUrl":"https://www.bilibili.com/video/BV1xxx180"},{"name":"农家一碗香","category":"湘菜","ingredients":["鸡蛋","猪肉","青椒"],"steps":["鸡蛋煎熟切块","猪肉炒香","加入青椒鸡蛋","调味出锅"],"time":15,"difficulty":"简单","id":"181","sourceUrl":"https://www.bilibili.com/video/BV1xxx181"},{"name":"永州血鸭","category":"湘菜","ingredients":["鸭肉","鸭血"],"steps":["鸭肉切块炒香","加入调料炖煮","倒入鸭血","翻炒均匀"],"time":50,"difficulty":"中等","id":"182","sourceUrl":"https://www.bilibili.com/video/BV1xxx182"},{"name":"东安子鸡","category":"湘菜","ingredients":["鸡肉","生姜","花椒"],"steps":["鸡肉切块","爆香姜花椒","倒入鸡肉翻炒","加醋和辣椒调味"],"time":35,"difficulty":"中等","id":"183","sourceUrl":"https://www.bilibili.com/video/BV1xxx183"},{"name":"口味虾","category":"湘菜","ingredients":["小龙虾","干辣椒","大蒜"],"steps":["小龙虾洗净","过油","炒香蒜和辣椒","倒入小龙虾焖煮"],"time":40,"difficulty":"中等","id":"184","sourceUrl":"https://www.bilibili.com/video/BV1xxx184"},{"name":"口味蛇","category":"湘菜","ingredients":["蛇肉","干辣椒"],"steps":["蛇肉切段","过油","炒香干辣椒","倒入蛇肉焖煮"],"time":50,"difficulty":"困难","id":"185","sourceUrl":"https://www.bilibili.com/video/BV1xxx185"},{"name":"腊味合蒸","category":"湘菜","ingredients":["腊肉","香肠","鱼"],"steps":["腊味切片","摆入碗中","大火蒸30分钟","倒扣装盘"],"time":40,"difficulty":"简单","id":"186","sourceUrl":"https://www.bilibili.com/video/BV1xxx186"},{"name":"毛氏红烧肉","category":"湘菜","ingredients":["五花肉"],"steps":["五花肉切块焯水","煸炒出油","加调料炖煮","大火收汁"],"time":70,"difficulty":"中等","id":"187","sourceUrl":"https://www.bilibili.com/video/BV1xxx187"},{"name":"湘西土匪鸭","category":"湘菜","ingredients":["鸭肉","土豆","干辣椒"],"steps":["鸭肉切块炒香","加入土豆","加干辣椒炖煮","收汁出锅"],"time":50,"difficulty":"中等","id":"188","sourceUrl":"https://www.bilibili.com/video/BV1xxx188"},{"name":"擂辣椒皮蛋","category":"湘菜","ingredients":["青椒","皮蛋"],"steps":["青椒烤至虎皮","皮蛋切块","一起擂碎","加调料拌匀"],"time":15,"difficulty":"简单","id":"189","sourceUrl":"https://www.bilibili.com/video/BV1xxx189"},{"name":"永州喝螺","category":"湘菜","ingredients":["螺蛳","紫苏"],"steps":["螺蛳吐沙洗净","爆香姜蒜","倒入螺蛳翻炒","加水焖煮"],"time":30,"difficulty":"中等","id":"190","sourceUrl":"https://www.bilibili.com/video/BV1xxx190"},{"name":"香辣跳跳蛙","category":"湘菜","ingredients":["牛蛙","莴笋","泡椒"],"steps":["牛蛙切块腌制","莴笋焯水","炒香泡椒","倒入牛蛙煮熟"],"time":30,"difficulty":"中等","id":"191","sourceUrl":"https://www.bilibili.com/video/BV1xxx191"},{"name":"干锅肥肠","category":"湘菜","ingredients":["肥肠","干辣椒","洋葱"],"steps":["肥肠煮熟切段","干煸至焦","加入干辣椒洋葱","翻炒均匀"],"time":40,"difficulty":"中等","id":"192","sourceUrl":"https://www.bilibili.com/video/BV1xxx192"},{"name":"干锅土豆","category":"湘菜","ingredients":["土豆","猪肉","干辣椒"],"steps":["土豆切片炸黄","猪肉炒香","加入干辣椒","倒入土豆炒匀"],"time":25,"difficulty":"中等","id":"193","sourceUrl":"https://www.bilibili.com/video/BV1xxx193"},{"name":"卜豆角炒肉","category":"湘菜","ingredients":["猪肉","酸豆角"],"steps":["猪肉切片","卜豆角泡发","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"194","sourceUrl":"https://www.bilibili.com/video/BV1xxx194"},{"name":"酸豆角炒肉末","category":"湘菜","ingredients":["肉末","酸豆角"],"steps":["肉末炒香","酸豆角切碎","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"195","sourceUrl":"https://www.bilibili.com/video/BV1xxx195"},{"name":"酸辣鸡杂","category":"湘菜","ingredients":["鸡胗","泡椒","酸豆角"],"steps":["鸡胗切片腌制","焯水","炒香泡椒酸豆角","倒入鸡杂翻炒"],"time":20,"difficulty":"中等","id":"196","sourceUrl":"https://www.bilibili.com/video/BV1xxx196"},{"name":"芷江鸭","category":"湘菜","ingredients":["鸭肉","土豆","干辣椒"],"steps":["鸭肉切块炒香","加入土豆","加干辣椒和水炖煮","收汁"],"time":60,"difficulty":"中等","id":"197","sourceUrl":"https://www.bilibili.com/video/BV1xxx197"},{"name":"血浆鸭","category":"湘菜","ingredients":["鸭肉","鸭血","青椒"],"steps":["鸭肉炒香","加青椒炖煮","倒入鸭血","翻炒均匀"],"time":50,"difficulty":"中等","id":"198","sourceUrl":"https://www.bilibili.com/video/BV1xxx198"},{"name":"邵阳猪血丸子","category":"湘菜","ingredients":["猪血","青椒"],"steps":["猪血丸子切片","青椒切块","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"199","sourceUrl":"https://www.bilibili.com/video/BV1xxx199"},{"name":"衡阳小炒","category":"湘菜","ingredients":["猪肉","芹菜","辣椒"],"steps":["猪肉切片","芹菜切段","热锅快炒","调味出锅"],"time":15,"difficulty":"简单","id":"200","sourceUrl":"https://www.bilibili.com/video/BV1xxx200"},{"name":"长沙臭豆腐","category":"湘菜","ingredients":["臭豆腐","蒜蓉","剁椒"],"steps":["臭豆腐油炸至金黄","戳洞","浇上蒜蓉剁椒汤汁","撒上香菜"],"time":20,"difficulty":"中等","id":"201","sourceUrl":"https://www.bilibili.com/video/BV1xxx201"},{"name":"糖油粑粑","category":"湘菜","ingredients":["糯米粉","糖"],"steps":["糯米粉加水揉团","搓成圆饼","油炸至金黄","裹上糖汁"],"time":25,"difficulty":"简单","id":"202","sourceUrl":"https://www.bilibili.com/video/BV1xxx202"},{"name":"姊妹团子","category":"湘菜","ingredients":["糯米粉","肉末"],"steps":["糯米粉揉团","包入肉末馅","蒸熟","即可食用"],"time":40,"difficulty":"中等","id":"203","sourceUrl":"https://www.bilibili.com/video/BV1xxx203"},{"name":"龙脂猪血","category":"湘菜","ingredients":["猪血","香菜"],"steps":["猪血切块","煮熟","调酸辣汤","撒上香菜"],"time":15,"difficulty":"简单","id":"204","sourceUrl":"https://www.bilibili.com/video/BV1xxx204"},{"name":"红烧猪脚","category":"湘菜","ingredients":["猪蹄"],"steps":["猪蹄焯水","煸炒","加调料炖煮","大火收汁"],"time":90,"difficulty":"中等","id":"205","sourceUrl":"https://www.bilibili.com/video/BV1xxx205"},{"name":"藠头炒腊肉","category":"湘菜","ingredients":["腊肉","藠头"],"steps":["腊肉切片","藠头切段","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"206","sourceUrl":"https://www.bilibili.com/video/BV1xxx206"},{"name":"蒜苗炒腊肉","category":"湘菜","ingredients":["腊肉","蒜苗"],"steps":["腊肉切片","蒜苗切段","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"207","sourceUrl":"https://www.bilibili.com/video/BV1xxx207"},{"name":"荷兰豆炒腊肠","category":"湘菜","ingredients":["香肠","荷兰豆"],"steps":["香肠切片","荷兰豆焯水","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"208","sourceUrl":"https://www.bilibili.com/video/BV1xxx208"},{"name":"小炒肚条","category":"湘菜","ingredients":["猪肚","青椒"],"steps":["猪肚煮熟切条","青椒切块","一起爆炒","调味出锅"],"time":25,"difficulty":"中等","id":"209","sourceUrl":"https://www.bilibili.com/video/BV1xxx209"},{"name":"酸辣肚丝","category":"湘菜","ingredients":["猪肚","酸豆角"],"steps":["猪肚切丝","焯水","加入酸豆角翻炒","调味出锅"],"time":25,"difficulty":"中等","id":"210","sourceUrl":"https://www.bilibili.com/video/BV1xxx210"},{"name":"土匪猪肝","category":"湘菜","ingredients":["猪肝","泡椒","蒜苗"],"steps":["猪肝切片腌制","焯水","炒香泡椒","加入猪肝蒜苗快炒"],"time":20,"difficulty":"中等","id":"211","sourceUrl":"https://www.bilibili.com/video/BV1xxx211"},{"name":"老干妈蒸排骨","category":"湘菜","ingredients":["排骨","老干妈"],"steps":["排骨剁块腌制","加老干妈拌匀","大火蒸30分钟","撒上葱花"],"time":40,"difficulty":"简单","id":"212","sourceUrl":"https://www.bilibili.com/video/BV1xxx212"},{"name":"紫苏煎黄瓜","category":"湘菜","ingredients":["黄瓜","紫苏"],"steps":["黄瓜切片","煎至两面金黄","加入紫苏","调味出锅"],"time":15,"difficulty":"简单","id":"213","sourceUrl":"https://www.bilibili.com/video/BV1xxx213"},{"name":"东坡肉","category":"江浙菜","ingredients":["五花肉"],"steps":["五花肉切块","煎至微焦","加料酒酱油糖炖煮","小火炖2小时"],"time":130,"difficulty":"中等","id":"214","sourceUrl":"https://www.bilibili.com/video/BV1xxx214"},{"name":"红烧狮子头","category":"江浙菜","ingredients":["肉末","荸荠"],"steps":["肉末加荸荠调味","团成大肉丸","炸至定型","红烧炖煮"],"time":70,"difficulty":"中等","id":"215","sourceUrl":"https://www.bilibili.com/video/BV1xxx215"},{"name":"糖醋小排","category":"江浙菜","ingredients":["排骨"],"steps":["排骨剁块焯水","煎至微焦","加糖醋汁炖煮","大火收汁"],"time":50,"difficulty":"中等","id":"216","sourceUrl":"https://www.bilibili.com/video/BV1xxx216"},{"name":"叫花鸡","category":"江浙菜","ingredients":["鸡肉"],"steps":["鸡腌制","荷叶包裹","外面裹泥","烤2小时"],"time":150,"difficulty":"困难","id":"217","sourceUrl":"https://www.bilibili.com/video/BV1xxx217"},{"name":"西湖醋鱼","category":"江浙菜","ingredients":["鱼"],"steps":["鱼处理干净","蒸熟","调糖醋汁","淋在鱼上"],"time":25,"difficulty":"中等","id":"218","sourceUrl":"https://www.bilibili.com/video/BV1xxx218"},{"name":"龙井虾仁","category":"江浙菜","ingredients":["虾仁","龙井茶"],"steps":["虾仁腌制","茶叶泡开","热锅滑炒虾仁","加入茶叶"],"time":15,"difficulty":"中等","id":"219","sourceUrl":"https://www.bilibili.com/video/BV1xxx219"},{"name":"宋嫂鱼羹","category":"江浙菜","ingredients":["鱼","香菇","木耳"],"steps":["鱼肉蒸熟拆碎","加香菇木耳煮汤","勾芡","淋上蛋液"],"time":40,"difficulty":"中等","id":"220","sourceUrl":"https://www.bilibili.com/video/BV1xxx220"},{"name":"东坡肘子","category":"江浙菜","ingredients":["猪蹄"],"steps":["猪蹄焯水","加调料炖煮","小火炖2小时","大火收汁"],"time":140,"difficulty":"中等","id":"221","sourceUrl":"https://www.bilibili.com/video/BV1xxx221"},{"name":"响油鳝糊","category":"江浙菜","ingredients":["鳝鱼","大蒜"],"steps":["鳝鱼切丝","焯水","炒鳝丝","淋上热油"],"time":25,"difficulty":"中等","id":"222","sourceUrl":"https://www.bilibili.com/video/BV1xxx222"},{"name":"清蒸白鱼","category":"江浙菜","ingredients":["鱼","小葱","生姜"],"steps":["鱼处理干净","铺葱姜","大火蒸12分钟","淋豉油"],"time":20,"difficulty":"简单","id":"223","sourceUrl":"https://www.bilibili.com/video/BV1xxx223"},{"name":"醉虾","category":"江浙菜","ingredients":["虾仁","料酒"],"steps":["虾洗净","用料酒等腌制","冷藏入味","即可食用"],"time":30,"difficulty":"中等","id":"224","sourceUrl":"https://www.bilibili.com/video/BV1xxx224"},{"name":"醉蟹","category":"江浙菜","ingredients":["蟹","料酒"],"steps":["蟹洗净","用料酒等腌制","冷藏数天","即可食用"],"time":2880,"difficulty":"困难","id":"225","sourceUrl":"https://www.bilibili.com/video/BV1xxx225"},{"name":"油爆虾","category":"江浙菜","ingredients":["虾仁"],"steps":["虾剪须","高温油炸","加糖和酱油翻炒","大火收汁"],"time":20,"difficulty":"中等","id":"226","sourceUrl":"https://www.bilibili.com/video/BV1xxx226"},{"name":"毛蟹年糕","category":"江浙菜","ingredients":["蟹","年糕"],"steps":["蟹处理干净切块","煎至变色","加入年糕","加水焖煮"],"time":35,"difficulty":"中等","id":"227","sourceUrl":"https://www.bilibili.com/video/BV1xxx227"},{"name":"腌笃鲜","category":"江浙菜","ingredients":["排骨","腊肉","竹笋"],"steps":["排骨焯水","腊肉切片","加入竹笋","小火炖煮1小时"],"time":80,"difficulty":"中等","id":"228","sourceUrl":"https://www.bilibili.com/video/BV1xxx228"},{"name":"雪菜大汤黄鱼","category":"江浙菜","ingredients":["黄花鱼","雪菜"],"steps":["黄鱼煎至两面","加入雪菜","加水煮开","调味出锅"],"time":30,"difficulty":"中等","id":"229","sourceUrl":"https://www.bilibili.com/video/BV1xxx229"},{"name":"葱烤鲫鱼","category":"江浙菜","ingredients":["鱼","小葱"],"steps":["鱼煎至两面金黄","加入大量葱段","加调料炖煮","大火收汁"],"time":35,"difficulty":"中等","id":"230","sourceUrl":"https://www.bilibili.com/video/BV1xxx230"},{"name":"红烧河鳗","category":"江浙菜","ingredients":["鳗鱼"],"steps":["河鳗处理干净","切段煎至金黄","加调料炖煮","大火收汁"],"time":50,"difficulty":"中等","id":"231","sourceUrl":"https://www.bilibili.com/video/BV1xxx231"},{"name":"蟹粉豆腐","category":"江浙菜","ingredients":["豆腐","蟹"],"steps":["蟹蒸熟拆蟹粉","豆腐切块焯水","加入蟹粉煮","勾芡出锅"],"time":35,"difficulty":"中等","id":"232","sourceUrl":"https://www.bilibili.com/video/BV1xxx232"},{"name":"蟹粉狮子头","category":"江浙菜","ingredients":["肉末","荸荠","蟹"],"steps":["肉末加荸荠调味","加入蟹粉","团成大肉丸炖煮","小火炖1小时"],"time":80,"difficulty":"困难","id":"233","sourceUrl":"https://www.bilibili.com/video/BV1xxx233"},{"name":"无锡酱排骨","category":"江浙菜","ingredients":["排骨"],"steps":["排骨焯水","加酱油糖炖煮","小火炖1小时","大火收汁"],"time":80,"difficulty":"中等","id":"234","sourceUrl":"https://www.bilibili.com/video/BV1xxx234"},{"name":"松鼠桂鱼","category":"江浙菜","ingredients":["鱼"],"steps":["鱼切花刀","裹粉炸至金黄","调番茄汁","淋在鱼上"],"time":40,"difficulty":"困难","id":"235","sourceUrl":"https://www.bilibili.com/video/BV1xxx235"},{"name":"碧螺虾仁","category":"江浙菜","ingredients":["虾仁","碧螺春"],"steps":["虾仁腌制","茶叶泡开","滑炒虾仁","加入茶叶"],"time":15,"difficulty":"中等","id":"236","sourceUrl":"https://www.bilibili.com/video/BV1xxx236"},{"name":"荷叶粉蒸肉","category":"江浙菜","ingredients":["五花肉","米粉"],"steps":["五花肉切片腌制","裹米粉","荷叶包裹","蒸1小时"],"time":75,"difficulty":"中等","id":"237","sourceUrl":"https://www.bilibili.com/video/BV1xxx237"},{"name":"嘉兴肉粽","category":"江浙菜","ingredients":["糯米","五花肉"],"steps":["糯米浸泡","五花肉腌制","粽叶包裹","煮熟"],"time":180,"difficulty":"中等","id":"238","sourceUrl":"https://www.bilibili.com/video/BV1xxx238"},{"name":"宁波汤圆","category":"江浙菜","ingredients":["糯米粉","黑芝麻"],"steps":["糯米粉揉团","包入芝麻馅","搓圆","煮熟"],"time":40,"difficulty":"简单","id":"239","sourceUrl":"https://www.bilibili.com/video/BV1xxx239"},{"name":"绍兴醉鸡","category":"江浙菜","ingredients":["鸡肉","料酒"],"steps":["鸡肉煮熟","用料酒等腌制","冷藏入味","切块"],"time":120,"difficulty":"中等","id":"240","sourceUrl":"https://www.bilibili.com/video/BV1xxx240"},{"name":"杭州片儿川","category":"江浙菜","ingredients":["面条","猪肉","雪菜"],"steps":["猪肉切片","雪菜切碎","炒肉片雪菜","加汤煮面"],"time":20,"difficulty":"简单","id":"241","sourceUrl":"https://www.bilibili.com/video/BV1xxx241"},{"name":"生煎包","category":"江浙菜","ingredients":["面粉","猪肉"],"steps":["面粉发酵","包入肉馅","平底锅煎至底部金黄","加水焖熟"],"time":50,"difficulty":"中等","id":"242","sourceUrl":"https://www.bilibili.com/video/BV1xxx242"},{"name":"小笼包","category":"江浙菜","ingredients":["面粉","猪肉"],"steps":["面粉做皮","猪肉调馅","包成小笼包","大火蒸8分钟"],"time":60,"difficulty":"中等","id":"243","sourceUrl":"https://www.bilibili.com/video/BV1xxx243"},{"name":"九转大肠","category":"鲁菜","ingredients":["肥肠"],"steps":["肥肠处理干净","套叠成段","油炸后红烧","小火收汁"],"time":60,"difficulty":"困难","id":"244","sourceUrl":"https://www.bilibili.com/video/BV1xxx244"},{"name":"糖醋鲤鱼","category":"鲁菜","ingredients":["鱼"],"steps":["鱼处理干净","炸至金黄","调糖醋汁","淋在鱼上"],"time":35,"difficulty":"中等","id":"245","sourceUrl":"https://www.bilibili.com/video/BV1xxx245"},{"name":"葱烧海参","category":"鲁菜","ingredients":["海参","大葱"],"steps":["海参泡发","大葱炸至金黄","加入海参红烧","勾芡出锅"],"time":50,"difficulty":"困难","id":"246","sourceUrl":"https://www.bilibili.com/video/BV1xxx246"},{"name":"油爆双脆","category":"鲁菜","ingredients":["猪肚","猪腰"],"steps":["猪肚猪腰切花刀","焯水","高温快炒","调味出锅"],"time":15,"difficulty":"困难","id":"247","sourceUrl":"https://www.bilibili.com/video/BV1xxx247"},{"name":"锅塌豆腐","category":"鲁菜","ingredients":["豆腐","鸡蛋"],"steps":["豆腐切块","裹蛋液煎至金黄","倒入料汁焖煮","收汁"],"time":20,"difficulty":"中等","id":"248","sourceUrl":"https://www.bilibili.com/video/BV1xxx248"},{"name":"德州扒鸡","category":"鲁菜","ingredients":["鸡肉"],"steps":["鸡处理干净","油炸定型","加香料炖煮","小火炖2小时"],"time":150,"difficulty":"困难","id":"249","sourceUrl":"https://www.bilibili.com/video/BV1xxx249"},{"name":"糟溜鱼片","category":"鲁菜","ingredients":["鱼","木耳"],"steps":["鱼片腌制","滑油","加入木耳和糟汁","勾芡出锅"],"time":25,"difficulty":"中等","id":"250","sourceUrl":"https://www.bilibili.com/video/BV1xxx250"},{"name":"奶汤蒲菜","category":"鲁菜","ingredients":["蒲菜","牛奶"],"steps":["蒲菜焯水","加牛奶煮","调味","撒上葱花"],"time":20,"difficulty":"中等","id":"251","sourceUrl":"https://www.bilibili.com/video/BV1xxx251"},{"name":"胶东大包","category":"鲁菜","ingredients":["面粉","猪肉","白菜"],"steps":["面粉发酵","猪肉白菜调馅","包成大包子","蒸熟"],"time":70,"difficulty":"中等","id":"252","sourceUrl":"https://www.bilibili.com/video/BV1xxx252"},{"name":"蓬莱小面","category":"鲁菜","ingredients":["面条","鱼","鸡蛋"],"steps":["鱼熬汤","面条煮熟","浇鱼汤","加蛋花"],"time":30,"difficulty":"中等","id":"253","sourceUrl":"https://www.bilibili.com/video/BV1xxx253"},{"name":"武大郎烧饼","category":"鲁菜","ingredients":["面粉","芝麻"],"steps":["面粉做饼","撒上芝麻","烤至金黄","即可食用"],"time":30,"difficulty":"简单","id":"254","sourceUrl":"https://www.bilibili.com/video/BV1xxx254"},{"name":"单县羊肉汤","category":"鲁菜","ingredients":["羊肉"],"steps":["羊肉焯水","加水炖煮","小火炖2小时","撒上香菜"],"time":130,"difficulty":"简单","id":"255","sourceUrl":"https://www.bilibili.com/video/BV1xxx255"},{"name":"把子肉","category":"鲁菜","ingredients":["五花肉"],"steps":["五花肉切大片","焯水","加酱油炖煮","小火炖1小时"],"time":80,"difficulty":"中等","id":"256","sourceUrl":"https://www.bilibili.com/video/BV1xxx256"},{"name":"甏肉干饭","category":"鲁菜","ingredients":["五花肉","米饭"],"steps":["五花肉切大片炖煮","米饭蒸熟","肉盖在饭上","浇汁"],"time":90,"difficulty":"中等","id":"257","sourceUrl":"https://www.bilibili.com/video/BV1xxx257"},{"name":"潍坊朝天锅","category":"鲁菜","ingredients":["猪肉","饼"],"steps":["猪肉煮熟切片","饼烙熟","卷入肉片","配葱酱"],"time":60,"difficulty":"中等","id":"258","sourceUrl":"https://www.bilibili.com/video/BV1xxx258"},{"name":"胶东鲅鱼饺子","category":"鲁菜","ingredients":["饺子皮","鲅鱼","韭菜"],"steps":["鲅鱼取肉剁馅","加韭菜调味","包饺子","煮熟"],"time":50,"difficulty":"中等","id":"259","sourceUrl":"https://www.bilibili.com/video/BV1xxx259"},{"name":"济南酥锅","category":"鲁菜","ingredients":["猪肉","白菜","海带"],"steps":["各种食材码放锅中","加调料","小火慢炖3小时","放凉食用"],"time":200,"difficulty":"中等","id":"260","sourceUrl":"https://www.bilibili.com/video/BV1xxx260"},{"name":"五香熏鱼","category":"鲁菜","ingredients":["鱼"],"steps":["鱼切块腌制","风干","油炸","熏制入味"],"time":120,"difficulty":"中等","id":"261","sourceUrl":"https://www.bilibili.com/video/BV1xxx261"},{"name":"炸蛎黄","category":"鲁菜","ingredients":["牡蛎"],"steps":["牡蛎洗净","裹糊","炸至金黄","蘸椒盐"],"time":20,"difficulty":"中等","id":"262","sourceUrl":"https://www.bilibili.com/video/BV1xxx262"},{"name":"芙蓉鸡片","category":"鲁菜","ingredients":["鸡肉","鸡蛋"],"steps":["鸡肉剁茸","加蛋清调糊","滑油成鸡片","勾芡出锅"],"time":25,"difficulty":"困难","id":"263","sourceUrl":"https://www.bilibili.com/video/BV1xxx263"},{"name":"扒原壳鲍鱼","category":"鲁菜","ingredients":["鲍鱼"],"steps":["鲍鱼处理干净","焯水","加高汤炖煮","勾芡出锅"],"time":40,"difficulty":"困难","id":"264","sourceUrl":"https://www.bilibili.com/video/BV1xxx264"},{"name":"诗礼银杏","category":"鲁菜","ingredients":["银杏","冰糖"],"steps":["银杏去壳","加冰糖煮","小火炖至软糯","冷藏食用"],"time":60,"difficulty":"中等","id":"265","sourceUrl":"https://www.bilibili.com/video/BV1xxx265"},{"name":"乌云托月","category":"鲁菜","ingredients":["鸡蛋","紫菜"],"steps":["紫菜泡发","鸡蛋打入碗中","冲入开水","加紫菜调味"],"time":10,"difficulty":"简单","id":"266","sourceUrl":"https://www.bilibili.com/video/BV1xxx266"},{"name":"黄焖鸡块","category":"鲁菜","ingredients":["鸡肉","香菇","青椒"],"steps":["鸡肉切块腌制","炒香鸡肉","加入香菇炖煮","放入青椒"],"time":40,"difficulty":"中等","id":"267","sourceUrl":"https://www.bilibili.com/video/BV1xxx267"},{"name":"红烧鱼翅","category":"鲁菜","ingredients":["鱼翅"],"steps":["鱼翅泡发","加高汤炖煮","勾芡","撒上火腿丝"],"time":120,"difficulty":"困难","id":"268","sourceUrl":"https://www.bilibili.com/video/BV1xxx268"},{"name":"芥末鸭掌","category":"鲁菜","ingredients":["鸭掌","芥末"],"steps":["鸭掌煮熟","去骨","调芥末汁","拌匀"],"time":40,"difficulty":"中等","id":"269","sourceUrl":"https://www.bilibili.com/video/BV1xxx269"},{"name":"蛋炒饭","category":"主食","ingredients":["米饭","鸡蛋","小葱"],"steps":["鸡蛋打散炒熟盛出","锅中倒油炒散米饭","加入鸡蛋翻炒均匀","撒上葱花出锅"],"time":10,"difficulty":"简单","id":"270","sourceUrl":"https://www.bilibili.com/video/BV1xxx270"},{"name":"扬州炒饭","category":"主食","ingredients":["米饭","鸡蛋","虾仁","火腿","胡萝卜"],"steps":["鸡蛋炒熟，配菜切丁","炒散米饭","加入鸡蛋和配菜","调味出锅"],"time":15,"difficulty":"简单","id":"271","sourceUrl":"https://www.bilibili.com/video/BV1xxx271"},{"name":"酱油蛋炒饭","category":"主食","ingredients":["米饭","鸡蛋","小葱"],"steps":["鸡蛋炒熟备用","炒散米饭","加入酱油和鸡蛋","撒葱花出锅"],"time":10,"difficulty":"简单","id":"272","sourceUrl":"https://www.bilibili.com/video/BV1xxx272"},{"name":"鸡肉蘑菇焗饭","category":"主食","ingredients":["米饭","鸡肉","蘑菇","奶酪"],"steps":["鸡肉蘑菇炒熟","铺在米饭上","撒奶酪","烤至融化"],"time":25,"difficulty":"中等","id":"273","sourceUrl":"https://www.bilibili.com/video/BV1xxx273"},{"name":"番茄鸡蛋盖浇饭","category":"主食","ingredients":["米饭","番茄","鸡蛋"],"steps":["番茄炒蛋做好","米饭盛盘","盖上番茄炒蛋","拌匀食用"],"time":15,"difficulty":"简单","id":"274","sourceUrl":"https://www.bilibili.com/video/BV1xxx274"},{"name":"肉末茄子盖浇饭","category":"主食","ingredients":["米饭","肉末","茄子"],"steps":["肉末茄子烧好","米饭盛碗","盖上肉末茄子","撒葱花"],"time":25,"difficulty":"简单","id":"275","sourceUrl":"https://www.bilibili.com/video/BV1xxx275"},{"name":"咖喱鸡肉饭","category":"主食","ingredients":["米饭","鸡肉","土豆","胡萝卜","洋葱"],"steps":["咖喱鸡肉炖好","米饭盛盘","浇上咖喱鸡肉","拌匀食用"],"time":45,"difficulty":"简单","id":"276","sourceUrl":"https://www.bilibili.com/video/BV1xxx276"},{"name":"牛肉炒饭","category":"主食","ingredients":["米饭","牛肉","洋葱","鸡蛋"],"steps":["牛肉炒熟，鸡蛋炒熟","炒散米饭","加入牛肉鸡蛋洋葱","调味出锅"],"time":15,"difficulty":"简单","id":"277","sourceUrl":"https://www.bilibili.com/video/BV1xxx277"},{"name":"虾仁炒饭","category":"主食","ingredients":["米饭","虾仁","鸡蛋","玉米粒"],"steps":["虾仁焯水，鸡蛋炒熟","炒散米饭","加入虾仁鸡蛋玉米","调味出锅"],"time":15,"difficulty":"简单","id":"278","sourceUrl":"https://www.bilibili.com/video/BV1xxx278"},{"name":"火腿炒饭","category":"主食","ingredients":["米饭","火腿","鸡蛋"],"steps":["火腿切丁，鸡蛋炒熟","炒散米饭","加入火腿鸡蛋","调味出锅"],"time":10,"difficulty":"简单","id":"279","sourceUrl":"https://www.bilibili.com/video/BV1xxx279"},{"name":"腊肉炒饭","category":"主食","ingredients":["米饭","腊肉","鸡蛋"],"steps":["腊肉切丁，鸡蛋炒熟","炒散米饭","加入腊肉鸡蛋","调味出锅"],"time":15,"difficulty":"简单","id":"280","sourceUrl":"https://www.bilibili.com/video/BV1xxx280"},{"name":"香肠炒饭","category":"主食","ingredients":["米饭","香肠","鸡蛋"],"steps":["香肠切片，鸡蛋炒熟","炒散米饭","加入香肠鸡蛋","调味出锅"],"time":12,"difficulty":"简单","id":"281","sourceUrl":"https://www.bilibili.com/video/BV1xxx281"},{"name":"泡菜炒饭","category":"主食","ingredients":["米饭","泡菜","鸡蛋"],"steps":["泡菜切碎，鸡蛋炒熟","炒散米饭","加入泡菜鸡蛋","调味出锅"],"time":12,"difficulty":"简单","id":"282","sourceUrl":"https://www.bilibili.com/video/BV1xxx282"},{"name":"紫菜包饭","category":"主食","ingredients":["米饭","紫菜","黄瓜","火腿","鸡蛋"],"steps":["米饭铺紫菜上","放黄瓜火腿鸡蛋","卷起切段","即可食用"],"time":25,"difficulty":"中等","id":"283","sourceUrl":"https://www.bilibili.com/video/BV1xxx283"},{"name":"蛋包饭","category":"主食","ingredients":["米饭","鸡蛋","番茄酱"],"steps":["炒饭做好备用","摊蛋皮","包入炒饭","挤上番茄酱"],"time":20,"difficulty":"简单","id":"284","sourceUrl":"https://www.bilibili.com/video/BV1xxx284"},{"name":"石锅拌饭","category":"主食","ingredients":["米饭","鸡蛋","菠菜","胡萝卜"],"steps":["米饭盛石锅","摆上配菜","中间放煎蛋","拌入辣酱"],"time":20,"difficulty":"简单","id":"285","sourceUrl":"https://www.bilibili.com/video/BV1xxx285"},{"name":"卤肉饭","category":"主食","ingredients":["米饭","肉末","洋葱"],"steps":["肉末炒香","加入洋葱和卤汁","小火炖煮","浇在米饭上"],"time":40,"difficulty":"中等","id":"286","sourceUrl":"https://www.bilibili.com/video/BV1xxx286"},{"name":"猪脚饭","category":"主食","ingredients":["米饭","猪蹄"],"steps":["猪蹄卤熟","米饭盛碗","放上猪蹄","浇卤汁"],"time":100,"difficulty":"中等","id":"287","sourceUrl":"https://www.bilibili.com/video/BV1xxx287"},{"name":"鸡腿饭","category":"主食","ingredients":["米饭","鸡腿"],"steps":["鸡腿煎至金黄","加水焖熟","米饭盛碗","放上鸡腿浇汁"],"time":35,"difficulty":"简单","id":"288","sourceUrl":"https://www.bilibili.com/video/BV1xxx288"},{"name":"鸡排饭","category":"主食","ingredients":["米饭","鸡肉"],"steps":["鸡肉拍松腌制","炸至金黄","切块盖饭","挤上酱汁"],"time":30,"difficulty":"简单","id":"289","sourceUrl":"https://www.bilibili.com/video/BV1xxx289"},{"name":"牛腩饭","category":"主食","ingredients":["米饭","牛肉","土豆"],"steps":["牛腩炖软","加入土豆","米饭盛碗","浇上牛腩土豆"],"time":90,"difficulty":"中等","id":"290","sourceUrl":"https://www.bilibili.com/video/BV1xxx290"},{"name":"排骨饭","category":"主食","ingredients":["米饭","排骨"],"steps":["排骨炖熟","米饭盛碗","放上排骨","浇汁"],"time":70,"difficulty":"中等","id":"291","sourceUrl":"https://www.bilibili.com/video/BV1xxx291"},{"name":"黄焖鸡米饭","category":"主食","ingredients":["米饭","鸡肉","土豆","青椒"],"steps":["黄焖鸡做好","米饭盛碗","浇上黄焖鸡","拌匀食用"],"time":40,"difficulty":"中等","id":"292","sourceUrl":"https://www.bilibili.com/video/BV1xxx292"},{"name":"照烧鸡腿饭","category":"主食","ingredients":["米饭","鸡腿"],"steps":["鸡腿去骨煎熟","刷照烧汁","切块盖饭","浇汁"],"time":30,"difficulty":"简单","id":"293","sourceUrl":"https://www.bilibili.com/video/BV1xxx293"},{"name":"叉烧饭","category":"主食","ingredients":["米饭","猪肉"],"steps":["猪肉做成叉烧","切片","米饭盛碗","铺上叉烧"],"time":50,"difficulty":"中等","id":"294","sourceUrl":"https://www.bilibili.com/video/BV1xxx294"},{"name":"烧鸭饭","category":"主食","ingredients":["米饭","鸭肉"],"steps":["鸭肉烤熟","切块","米饭盛碗","铺上烧鸭"],"time":120,"difficulty":"中等","id":"295","sourceUrl":"https://www.bilibili.com/video/BV1xxx295"},{"name":"蛋炒饭","category":"主食","ingredients":["米饭","鸡蛋"],"steps":["鸡蛋炒熟","炒散米饭","加入鸡蛋","调味出锅"],"time":10,"difficulty":"简单","id":"296","sourceUrl":"https://www.bilibili.com/video/BV1xxx296"},{"name":"蛋炒河粉","category":"主食","ingredients":["河粉","鸡蛋","豆芽"],"steps":["鸡蛋炒熟","河粉焯水","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"297","sourceUrl":"https://www.bilibili.com/video/BV1xxx297"},{"name":"炒米粉","category":"主食","ingredients":["米粉","鸡蛋","豆芽"],"steps":["米粉泡软","鸡蛋炒熟","一起翻炒","调味出锅"],"time":15,"difficulty":"简单","id":"298","sourceUrl":"https://www.bilibili.com/video/BV1xxx298"},{"name":"炒年糕","category":"主食","ingredients":["年糕","鸡蛋","生菜"],"steps":["年糕焯水","鸡蛋炒熟","加入青菜年糕","调味出锅"],"time":15,"difficulty":"简单","id":"299","sourceUrl":"https://www.bilibili.com/video/BV1xxx299"},{"name":"韩式炒年糕","category":"主食","ingredients":["年糕","鱼饼","泡菜"],"steps":["年糕煮软","加入鱼饼泡菜","加辣酱翻炒","撒上芝麻"],"time":20,"difficulty":"简单","id":"300","sourceUrl":"https://www.bilibili.com/video/BV1xxx300"},{"name":"螺蛳粉","category":"主食","ingredients":["米粉","酸豆角","花生"],"steps":["米粉煮熟","加入螺蛳汤","放酸豆角花生","即可食用"],"time":20,"difficulty":"简单","id":"301","sourceUrl":"https://www.bilibili.com/video/BV1xxx301"},{"name":"过桥米线","category":"主食","ingredients":["米粉","鸡肉","豆芽"],"steps":["鸡汤煮好","米粉烫熟","放入配菜","浇鸡汤"],"time":30,"difficulty":"中等","id":"302","sourceUrl":"https://www.bilibili.com/video/BV1xxx302"},{"name":"砂锅米线","category":"主食","ingredients":["米粉","肉末","豆芽"],"steps":["肉末炒香","加水煮开","放入米粉配菜","煮熟调味"],"time":20,"difficulty":"简单","id":"303","sourceUrl":"https://www.bilibili.com/video/BV1xxx303"},{"name":"麻辣烫","category":"主食","ingredients":["粉丝","豆腐","白菜","蘑菇"],"steps":["食材串起","煮麻辣汤底","烫熟食材","蘸料食用"],"time":25,"difficulty":"简单","id":"304","sourceUrl":"https://www.bilibili.com/video/BV1xxx304"},{"name":"麻辣香锅饭","category":"主食","ingredients":["米饭","虾仁","土豆","莲藕"],"steps":["食材炸熟","炒香火锅底料","倒入食材翻炒","盖在米饭上"],"time":30,"difficulty":"中等","id":"305","sourceUrl":"https://www.bilibili.com/video/BV1xxx305"},{"name":"芝士焗饭","category":"主食","ingredients":["米饭","鸡肉","奶酪"],"steps":["鸡肉炒熟","铺在米饭上","撒奶酪","烤至融化"],"time":25,"difficulty":"简单","id":"306","sourceUrl":"https://www.bilibili.com/video/BV1xxx306"},{"name":"咖喱焗饭","category":"主食","ingredients":["米饭","鸡肉","奶酪","洋葱"],"steps":["鸡肉洋葱炒熟","加咖喱汁","铺在米饭上撒奶酪","烤至融化"],"time":30,"difficulty":"简单","id":"307","sourceUrl":"https://www.bilibili.com/video/BV1xxx307"},{"name":"海鲜焗饭","category":"主食","ingredients":["米饭","虾仁","鱿鱼","奶酪"],"steps":["海鲜炒熟","铺在米饭上","撒奶酪","烤至融化"],"time":25,"difficulty":"中等","id":"308","sourceUrl":"https://www.bilibili.com/video/BV1xxx308"},{"name":"西班牙海鲜饭","category":"主食","ingredients":["米饭","虾仁","鱿鱼","青豆"],"steps":["海鲜炒香","加入米饭和藏红花","加水焖煮","大火收汁"],"time":40,"difficulty":"中等","id":"309","sourceUrl":"https://www.bilibili.com/video/BV1xxx309"},{"name":"意大利肉酱面","category":"主食","ingredients":["意大利面","肉末","番茄"],"steps":["肉末炒香","番茄炒成酱","意面煮熟","拌上肉酱"],"time":30,"difficulty":"简单","id":"310","sourceUrl":"https://www.bilibili.com/video/BV1xxx310"},{"name":"奶油蘑菇意面","category":"主食","ingredients":["意大利面","蘑菇","牛奶"],"steps":["蘑菇炒香","加牛奶煮浓稠","意面煮熟","拌匀"],"time":25,"difficulty":"简单","id":"311","sourceUrl":"https://www.bilibili.com/video/BV1xxx311"},{"name":"番茄肉酱意面","category":"主食","ingredients":["意大利面","肉末","番茄"],"steps":["肉末炒香","番茄炒酱","意面煮熟","拌匀"],"time":30,"difficulty":"简单","id":"312","sourceUrl":"https://www.bilibili.com/video/BV1xxx312"},{"name":"黑椒牛柳意面","category":"主食","ingredients":["意大利面","牛肉","青椒","洋葱"],"steps":["牛肉炒熟","煮黑椒汁","意面煮熟","拌匀"],"time":25,"difficulty":"中等","id":"313","sourceUrl":"https://www.bilibili.com/video/BV1xxx313"},{"name":"葱油拌面","category":"主食","ingredients":["面条","小葱"],"steps":["小葱炸至金黄","调葱油","面条煮熟","拌匀"],"time":15,"difficulty":"简单","id":"314","sourceUrl":"https://www.bilibili.com/video/BV1xxx314"},{"name":"麻酱拌面","category":"主食","ingredients":["面条","芝麻酱","黄瓜"],"steps":["芝麻酱调开","黄瓜切丝","面条煮熟","拌匀"],"time":15,"difficulty":"简单","id":"315","sourceUrl":"https://www.bilibili.com/video/BV1xxx315"},{"name":"炸酱面","category":"主食","ingredients":["面条","肉末","黄瓜"],"steps":["肉末炸酱","黄瓜切丝","面条煮熟","拌匀"],"time":25,"difficulty":"简单","id":"316","sourceUrl":"https://www.bilibili.com/video/BV1xxx316"},{"name":"兰州牛肉面","category":"主食","ingredients":["面条","牛肉","香菜"],"steps":["牛肉炖汤","面条煮熟","浇牛肉汤","放牛肉香菜"],"time":120,"difficulty":"中等","id":"317","sourceUrl":"https://www.bilibili.com/video/BV1xxx317"},{"name":"红烧牛肉面","category":"主食","ingredients":["面条","牛肉","胡萝卜"],"steps":["牛肉炖软","面条煮熟","浇上牛肉汤","放牛肉萝卜"],"time":120,"difficulty":"中等","id":"318","sourceUrl":"https://www.bilibili.com/video/BV1xxx318"},{"name":"重庆小面","category":"主食","ingredients":["面条","肉末","豌豆"],"steps":["肉末炒香","调麻辣汤底","面条煮熟","浇汤放肉末"],"time":20,"difficulty":"简单","id":"319","sourceUrl":"https://www.bilibili.com/video/BV1xxx319"},{"name":"热干面","category":"主食","ingredients":["面条","芝麻酱","酸豆角"],"steps":["面条煮熟过水","拌入芝麻酱","加酸豆角","拌匀食用"],"time":15,"difficulty":"简单","id":"320","sourceUrl":"https://www.bilibili.com/video/BV1xxx320"},{"name":"臊子面","category":"主食","ingredients":["面条","肉末","土豆","胡萝卜"],"steps":["肉末炒香","配菜切丁炒熟","调汤","面条煮熟浇臊子"],"time":30,"difficulty":"中等","id":"321","sourceUrl":"https://www.bilibili.com/video/BV1xxx321"},{"name":"油泼面","category":"主食","ingredients":["面条","小葱","干辣椒"],"steps":["面条煮熟","放葱花辣椒面","热油泼香","拌匀"],"time":15,"difficulty":"简单","id":"322","sourceUrl":"https://www.bilibili.com/video/BV1xxx322"},{"name":"番茄鸡蛋面","category":"面食","ingredients":["面条","番茄","鸡蛋"],"steps":["番茄炒蛋做卤","加水煮开","另起锅煮面","浇卤食用"],"time":20,"difficulty":"简单","id":"323","sourceUrl":"https://www.bilibili.com/video/BV1xxx323"},{"name":"牛肉面","category":"面食","ingredients":["面条","牛肉","胡萝卜","香菜"],"steps":["牛肉炖软","另起锅煮面","碗中放面牛肉汤","放牛肉香菜"],"time":120,"difficulty":"中等","id":"324","sourceUrl":"https://www.bilibili.com/video/BV1xxx324"},{"name":"鸡汤面","category":"面食","ingredients":["面条","鸡肉","蘑菇"],"steps":["鸡肉蘑菇炖汤","另起锅煮面","碗中放面鸡汤","放鸡肉蘑菇"],"time":60,"difficulty":"简单","id":"325","sourceUrl":"https://www.bilibili.com/video/BV1xxx325"},{"name":"肉末青椒面","category":"面食","ingredients":["面条","肉末","青椒"],"steps":["肉末炒熟成臊子","青椒切丁","面条煮熟","浇肉末青椒"],"time":20,"difficulty":"简单","id":"326","sourceUrl":"https://www.bilibili.com/video/BV1xxx326"},{"name":"麻酱凉面","category":"面食","ingredients":["面条","黄瓜","胡萝卜"],"steps":["芝麻酱调开","黄瓜胡萝卜切丝","面条煮熟过凉水","浇麻酱拌匀"],"time":15,"difficulty":"简单","id":"327","sourceUrl":"https://www.bilibili.com/video/BV1xxx327"},{"name":"羊肉炒面","category":"面食","ingredients":["面条","羊肉","青椒","洋葱","番茄"],"steps":["面条煮熟过凉水","羊肉蔬菜切片","爆炒羊肉蔬菜","倒入面条炒匀"],"time":25,"difficulty":"中等","id":"328","sourceUrl":"https://www.bilibili.com/video/BV1xxx328"},{"name":"鸡蛋面","category":"面食","ingredients":["面条","鸡蛋","番茄"],"steps":["番茄炒蛋做卤","面条煮熟捞出","浇卤","拌匀"],"time":20,"difficulty":"简单","id":"329","sourceUrl":"https://www.bilibili.com/video/BV1xxx329"},{"name":"馄饨面","category":"面食","ingredients":["面条","馄饨皮","猪肉","虾仁"],"steps":["猪肉虾仁包馄饨","面条馄饨一起煮","碗中调好汤底","捞入食用"],"time":40,"difficulty":"中等","id":"330","sourceUrl":"https://www.bilibili.com/video/BV1xxx330"},{"name":"猪肉白菜饺子","category":"面食","ingredients":["饺子皮","猪肉","白菜"],"steps":["白菜切碎挤水","与肉末调馅","包饺子","煮熟"],"time":60,"difficulty":"中等","id":"331","sourceUrl":"https://www.bilibili.com/video/BV1xxx331"},{"name":"韭菜鸡蛋饺子","category":"面食","ingredients":["饺子皮","韭菜","鸡蛋"],"steps":["韭菜切碎，鸡蛋炒熟切碎","调馅","包饺子","煮熟"],"time":50,"difficulty":"简单","id":"332","sourceUrl":"https://www.bilibili.com/video/BV1xxx332"},{"name":"三鲜饺子","category":"面食","ingredients":["饺子皮","猪肉","虾仁","韭菜"],"steps":["韭菜切碎，虾仁猪肉调馅","包饺子","水开煮熟","捞出装盘"],"time":60,"difficulty":"中等","id":"333","sourceUrl":"https://www.bilibili.com/video/BV1xxx333"},{"name":"牛肉饺子","category":"面食","ingredients":["饺子皮","牛肉","大葱"],"steps":["牛肉剁馅加大葱","包饺子","水开煮熟","捞出"],"time":60,"difficulty":"中等","id":"334","sourceUrl":"https://www.bilibili.com/video/BV1xxx334"},{"name":"羊肉饺子","category":"面食","ingredients":["饺子皮","羊肉","大葱"],"steps":["羊肉剁馅加大葱","包饺子","水开煮熟","捞出"],"time":60,"difficulty":"中等","id":"335","sourceUrl":"https://www.bilibili.com/video/BV1xxx335"},{"name":"酸菜猪肉饺子","category":"面食","ingredients":["饺子皮","猪肉","酸菜"],"steps":["酸菜切碎","与肉末调馅","包饺子","煮熟"],"time":60,"difficulty":"中等","id":"336","sourceUrl":"https://www.bilibili.com/video/BV1xxx336"},{"name":"芹菜猪肉饺子","category":"面食","ingredients":["饺子皮","猪肉","芹菜"],"steps":["芹菜切碎","与肉末调馅","包饺子","煮熟"],"time":60,"difficulty":"中等","id":"337","sourceUrl":"https://www.bilibili.com/video/BV1xxx337"},{"name":"香菇鸡肉饺子","category":"面食","ingredients":["饺子皮","鸡肉","香菇"],"steps":["鸡肉香菇剁馅","包饺子","水开煮熟","捞出"],"time":60,"difficulty":"中等","id":"338","sourceUrl":"https://www.bilibili.com/video/BV1xxx338"},{"name":"虾仁饺子","category":"面食","ingredients":["饺子皮","虾仁","猪肉"],"steps":["虾仁猪肉剁馅","包饺子","水开煮熟","捞出"],"time":50,"difficulty":"中等","id":"339","sourceUrl":"https://www.bilibili.com/video/BV1xxx339"},{"name":"鲅鱼饺子","category":"面食","ingredients":["饺子皮","鲅鱼","韭菜"],"steps":["鲅鱼取肉剁馅","加韭菜","包饺子","煮熟"],"time":50,"difficulty":"中等","id":"340","sourceUrl":"https://www.bilibili.com/video/BV1xxx340"},{"name":"猪肉大葱馄饨","category":"面食","ingredients":["馄饨皮","猪肉","大葱"],"steps":["猪肉大葱调馅","包馄饨","煮熟","连汤盛碗"],"time":40,"difficulty":"简单","id":"341","sourceUrl":"https://www.bilibili.com/video/BV1xxx341"},{"name":"虾仁馄饨","category":"面食","ingredients":["馄饨皮","虾仁","猪肉"],"steps":["虾仁猪肉调馅","包馄饨","煮熟","连汤盛碗"],"time":40,"difficulty":"中等","id":"342","sourceUrl":"https://www.bilibili.com/video/BV1xxx342"},{"name":"荠菜馄饨","category":"面食","ingredients":["馄饨皮","猪肉","荠菜"],"steps":["荠菜切碎","与肉末调馅","包馄饨","煮熟"],"time":40,"difficulty":"中等","id":"343","sourceUrl":"https://www.bilibili.com/video/BV1xxx343"},{"name":"紫菜虾皮馄饨","category":"面食","ingredients":["馄饨皮","猪肉","紫菜","虾皮"],"steps":["猪肉调馅包馄饨","煮熟","碗中放紫菜虾皮","连汤盛入"],"time":35,"difficulty":"简单","id":"344","sourceUrl":"https://www.bilibili.com/video/BV1xxx344"},{"name":"云吞","category":"面食","ingredients":["馄饨皮","猪肉","虾仁"],"steps":["虾仁猪肉调馅","包云吞","煮熟","配高汤"],"time":40,"difficulty":"中等","id":"345","sourceUrl":"https://www.bilibili.com/video/BV1xxx345"},{"name":"灌汤包","category":"面食","ingredients":["面粉","猪肉"],"steps":["猪皮冻切碎","猪肉调馅","包成汤包","蒸10分钟"],"time":70,"difficulty":"困难","id":"346","sourceUrl":"https://www.bilibili.com/video/BV1xxx346"},{"name":"奶黄包","category":"面食","ingredients":["面粉","鸡蛋","牛奶"],"steps":["面粉发酵","调奶黄馅","包成包子","蒸熟"],"time":60,"difficulty":"中等","id":"347","sourceUrl":"https://www.bilibili.com/video/BV1xxx347"},{"name":"豆沙包","category":"面食","ingredients":["面粉","红豆"],"steps":["红豆煮烂加糖","面粉发酵","包成豆沙包","蒸熟"],"time":80,"difficulty":"中等","id":"348","sourceUrl":"https://www.bilibili.com/video/BV1xxx348"},{"name":"肉龙","category":"面食","ingredients":["面粉","猪肉"],"steps":["面粉发酵","肉末调馅","铺在面皮上卷起","蒸熟切段"],"time":70,"difficulty":"中等","id":"349","sourceUrl":"https://www.bilibili.com/video/BV1xxx349"},{"name":"花卷","category":"面食","ingredients":["面粉","小葱"],"steps":["面粉发酵","擀成面皮","撒葱花卷起","蒸熟"],"time":50,"difficulty":"简单","id":"350","sourceUrl":"https://www.bilibili.com/video/BV1xxx350"},{"name":"馒头","category":"面食","ingredients":["面粉"],"steps":["面粉发酵","揉成团","整形","蒸熟"],"time":40,"difficulty":"简单","id":"351","sourceUrl":"https://www.bilibili.com/video/BV1xxx351"},{"name":"葱花饼","category":"面食","ingredients":["面粉","小葱"],"steps":["面粉揉团","擀成饼撒葱花","卷起再擀","烙熟"],"time":30,"difficulty":"简单","id":"352","sourceUrl":"https://www.bilibili.com/video/BV1xxx352"},{"name":"韭菜盒子","category":"面食","ingredients":["面粉","韭菜","鸡蛋"],"steps":["韭菜鸡蛋调馅","面粉做皮","包成盒子","烙熟"],"time":40,"difficulty":"简单","id":"353","sourceUrl":"https://www.bilibili.com/video/BV1xxx353"},{"name":"馅饼","category":"面食","ingredients":["面粉","猪肉"],"steps":["猪肉调馅","面粉做皮","包成馅饼","烙熟"],"time":40,"difficulty":"中等","id":"354","sourceUrl":"https://www.bilibili.com/video/BV1xxx354"},{"name":"锅贴","category":"面食","ingredients":["饺子皮","猪肉"],"steps":["猪肉调馅","包成锅贴","煎至底部金黄","加水焖熟"],"time":30,"difficulty":"中等","id":"355","sourceUrl":"https://www.bilibili.com/video/BV1xxx355"},{"name":"水煎包","category":"面食","ingredients":["面粉","猪肉"],"steps":["面粉发酵","猪肉调馅","包成包子","煎至底部金黄加水焖"],"time":50,"difficulty":"中等","id":"356","sourceUrl":"https://www.bilibili.com/video/BV1xxx356"},{"name":"烧麦","category":"面食","ingredients":["饺子皮","糯米","猪肉"],"steps":["糯米蒸熟","猪肉香菇炒熟","混合成馅","包成烧麦蒸熟"],"time":70,"difficulty":"中等","id":"357","sourceUrl":"https://www.bilibili.com/video/BV1xxx357"},{"name":"汤圆","category":"面食","ingredients":["糯米粉","黑芝麻"],"steps":["糯米粉揉团","包入芝麻馅","搓圆","煮熟"],"time":40,"difficulty":"简单","id":"358","sourceUrl":"https://www.bilibili.com/video/BV1xxx358"},{"name":"红糖糍粑","category":"面食","ingredients":["糯米粉","红糖"],"steps":["糯米粉揉团","搓条煎熟","淋上红糖浆","撒上黄豆粉"],"time":25,"difficulty":"简单","id":"359","sourceUrl":"https://www.bilibili.com/video/BV1xxx359"},{"name":"驴打滚","category":"面食","ingredients":["糯米粉","红豆","黄豆粉"],"steps":["糯米粉蒸熟","铺红豆馅卷起","撒上黄豆粉","切段"],"time":60,"difficulty":"中等","id":"360","sourceUrl":"https://www.bilibili.com/video/BV1xxx360"},{"name":"艾窝窝","category":"面食","ingredients":["糯米粉","红豆"],"steps":["糯米粉蒸熟","包入红豆馅","滚上熟粉","即可食用"],"time":50,"difficulty":"简单","id":"361","sourceUrl":"https://www.bilibili.com/video/BV1xxx361"},{"name":"豌豆黄","category":"面食","ingredients":["豌豆","糖"],"steps":["豌豆煮烂","打成泥","加糖煮稠","冷藏切块"],"time":60,"difficulty":"中等","id":"362","sourceUrl":"https://www.bilibili.com/video/BV1xxx362"},{"name":"凉糕","category":"面食","ingredients":["糯米粉","红糖"],"steps":["糯米粉加水蒸熟","放凉","淋上红糖浆","即可食用"],"time":40,"difficulty":"简单","id":"363","sourceUrl":"https://www.bilibili.com/video/BV1xxx363"},{"name":"凉皮","category":"面食","ingredients":["面粉","黄瓜","豆芽"],"steps":["面粉洗出面筋","淀粉浆蒸成凉皮","切条","加配菜调料拌匀"],"time":120,"difficulty":"中等","id":"364","sourceUrl":"https://www.bilibili.com/video/BV1xxx364"},{"name":"擀面皮","category":"面食","ingredients":["面粉","黄瓜","豆芽"],"steps":["面粉洗出面筋","发酵后蒸制","切条加配菜","调料拌匀"],"time":180,"difficulty":"中等","id":"365","sourceUrl":"https://www.bilibili.com/video/BV1xxx365"},{"name":"肉夹馍","category":"面食","ingredients":["面粉","猪肉"],"steps":["猪肉卤熟剁碎","面饼烙熟","切开夹入肉末","浇汁"],"time":90,"difficulty":"中等","id":"366","sourceUrl":"https://www.bilibili.com/video/BV1xxx366"},{"name":"煎饼果子","category":"面食","ingredients":["面粉","鸡蛋","油条"],"steps":["面糊摊成饼","加鸡蛋翻面","刷酱放油条","卷起"],"time":15,"difficulty":"简单","id":"367","sourceUrl":"https://www.bilibili.com/video/BV1xxx367"},{"name":"鸡蛋灌饼","category":"面食","ingredients":["面粉","鸡蛋"],"steps":["面饼烙至鼓起","灌入蛋液","煎熟","刷酱卷起"],"time":20,"difficulty":"简单","id":"368","sourceUrl":"https://www.bilibili.com/video/BV1xxx368"},{"name":"手抓饼","category":"面食","ingredients":["面粉","鸡蛋","生菜"],"steps":["饼胚煎熟","加鸡蛋生菜","刷酱","卷起"],"time":15,"difficulty":"简单","id":"369","sourceUrl":"https://www.bilibili.com/video/BV1xxx369"},{"name":"葱油饼","category":"面食","ingredients":["面粉","小葱"],"steps":["面团擀薄","撒葱花卷起","再擀成饼","烙至金黄"],"time":30,"difficulty":"简单","id":"370","sourceUrl":"https://www.bilibili.com/video/BV1xxx370"},{"name":"鸡蛋饼","category":"早餐","ingredients":["面粉","鸡蛋"],"steps":["面粉加水调糊","加入鸡蛋","摊成薄饼","煎至金黄"],"time":15,"difficulty":"简单","id":"371","sourceUrl":"https://www.bilibili.com/video/BV1xxx371"},{"name":"蔬菜鸡蛋饼","category":"早餐","ingredients":["面粉","鸡蛋","胡萝卜","西葫芦"],"steps":["蔬菜擦丝","加面粉鸡蛋调成糊","摊饼煎熟","切块"],"time":20,"difficulty":"简单","id":"372","sourceUrl":"https://www.bilibili.com/video/BV1xxx372"},{"name":"土豆饼","category":"早餐","ingredients":["土豆","面粉","鸡蛋"],"steps":["土豆擦丝","加面粉鸡蛋","摊饼煎熟","切块"],"time":20,"difficulty":"简单","id":"373","sourceUrl":"https://www.bilibili.com/video/BV1xxx373"},{"name":"南瓜饼","category":"早餐","ingredients":["南瓜","糯米粉"],"steps":["南瓜蒸熟压泥","加糯米粉揉团","搓饼煎熟","装盘"],"time":30,"difficulty":"简单","id":"374","sourceUrl":"https://www.bilibili.com/video/BV1xxx374"},{"name":"红薯饼","category":"早餐","ingredients":["红薯","糯米粉"],"steps":["红薯蒸熟压泥","加糯米粉揉团","搓饼煎熟","装盘"],"time":30,"difficulty":"简单","id":"375","sourceUrl":"https://www.bilibili.com/video/BV1xxx375"},{"name":"紫薯饼","category":"早餐","ingredients":["紫薯","糯米粉"],"steps":["紫薯蒸熟压泥","加糯米粉揉团","搓饼煎熟","装盘"],"time":30,"difficulty":"简单","id":"376","sourceUrl":"https://www.bilibili.com/video/BV1xxx376"},{"name":"玉米饼","category":"早餐","ingredients":["玉米面","面粉","鸡蛋"],"steps":["玉米面面粉加水","加鸡蛋调成糊","摊饼煎熟","切块"],"time":20,"difficulty":"简单","id":"377","sourceUrl":"https://www.bilibili.com/video/BV1xxx377"},{"name":"三明治","category":"早餐","ingredients":["吐司","鸡蛋","火腿"],"steps":["吐司片备好","煎蛋煎火腿","夹入吐司","对角切开"],"time":10,"difficulty":"简单","id":"378","sourceUrl":"https://www.bilibili.com/video/BV1xxx378"},{"name":"吐司煎蛋","category":"早餐","ingredients":["吐司","鸡蛋"],"steps":["吐司中间挖空","打入鸡蛋","煎至两面金黄","装盘"],"time":10,"difficulty":"简单","id":"379","sourceUrl":"https://www.bilibili.com/video/BV1xxx379"},{"name":"法式吐司","category":"早餐","ingredients":["吐司","鸡蛋","牛奶"],"steps":["鸡蛋牛奶打散","吐司浸泡","煎至金黄","淋上蜂蜜"],"time":15,"difficulty":"简单","id":"380","sourceUrl":"https://www.bilibili.com/video/BV1xxx380"},{"name":"牛奶燕麦","category":"早餐","ingredients":["牛奶","燕麦"],"steps":["牛奶煮开","加入燕麦","煮3分钟","盛出"],"time":5,"difficulty":"简单","id":"381","sourceUrl":"https://www.bilibili.com/video/BV1xxx381"},{"name":"酸奶水果燕麦","category":"早餐","ingredients":["酸奶","燕麦","香蕉"],"steps":["燕麦铺在碗底","倒入酸奶","放上香蕉片","拌匀"],"time":5,"difficulty":"简单","id":"382","sourceUrl":"https://www.bilibili.com/video/BV1xxx382"},{"name":"白粥配咸菜","category":"早餐","ingredients":["米饭","榨菜"],"steps":["米煮成白粥","榨菜切碎","配粥食用"],"time":30,"difficulty":"简单","id":"383","sourceUrl":"https://www.bilibili.com/video/BV1xxx383"},{"name":"小米粥","category":"早餐","ingredients":["小米"],"steps":["小米洗净","加水煮开","小火煮30分钟","盛出"],"time":35,"difficulty":"简单","id":"384","sourceUrl":"https://www.bilibili.com/video/BV1xxx384"},{"name":"红豆粥","category":"早餐","ingredients":["红豆","米饭"],"steps":["红豆泡发","与米一起煮","小火煮1小时","加糖"],"time":80,"difficulty":"简单","id":"385","sourceUrl":"https://www.bilibili.com/video/BV1xxx385"},{"name":"八宝粥","category":"早餐","ingredients":["红豆","糯米","莲子","花生"],"steps":["各种豆类泡发","一起煮粥","小火煮1.5小时","加糖"],"time":120,"difficulty":"简单","id":"386","sourceUrl":"https://www.bilibili.com/video/BV1xxx386"},{"name":"豆浆","category":"早餐","ingredients":["黄豆"],"steps":["黄豆泡发","加水打成浆","过滤煮沸","加糖"],"time":40,"difficulty":"简单","id":"387","sourceUrl":"https://www.bilibili.com/video/BV1xxx387"},{"name":"豆腐脑","category":"早餐","ingredients":["豆腐","木耳","黄花菜"],"steps":["豆腐蒸熟","木耳黄花菜做卤","浇在豆腐上","调味"],"time":30,"difficulty":"简单","id":"388","sourceUrl":"https://www.bilibili.com/video/BV1xxx388"},{"name":"油条","category":"早餐","ingredients":["面粉"],"steps":["面粉发酵","擀成长条","油炸至金黄","捞出"],"time":60,"difficulty":"中等","id":"389","sourceUrl":"https://www.bilibili.com/video/BV1xxx389"},{"name":"包子","category":"早餐","ingredients":["面粉","猪肉"],"steps":["面粉发酵","猪肉调馅","包成包子","蒸熟"],"time":70,"difficulty":"中等","id":"390","sourceUrl":"https://www.bilibili.com/video/BV1xxx390"},{"name":"菜包","category":"早餐","ingredients":["面粉","白菜","香菇"],"steps":["面粉发酵","白菜香菇调馅","包成菜包","蒸熟"],"time":70,"difficulty":"中等","id":"391","sourceUrl":"https://www.bilibili.com/video/BV1xxx391"},{"name":"小馄饨","category":"早餐","ingredients":["馄饨皮","猪肉"],"steps":["猪肉调馅","包小馄饨","煮熟","连汤盛碗"],"time":25,"difficulty":"简单","id":"392","sourceUrl":"https://www.bilibili.com/video/BV1xxx392"},{"name":"蒸饺","category":"早餐","ingredients":["饺子皮","猪肉"],"steps":["猪肉调馅","包成饺子","大火蒸15分钟","装盘"],"time":40,"difficulty":"简单","id":"393","sourceUrl":"https://www.bilibili.com/video/BV1xxx393"},{"name":"煎饺","category":"早餐","ingredients":["饺子皮","猪肉"],"steps":["猪肉调馅包饺子","放入冰箱冷冻","煎熟","蘸醋"],"time":40,"difficulty":"简单","id":"394","sourceUrl":"https://www.bilibili.com/video/BV1xxx394"},{"name":"鸡蛋肠粉","category":"早餐","ingredients":["大米粉","鸡蛋"],"steps":["米浆摊平","加鸡蛋蒸熟","卷起切段","淋酱油"],"time":20,"difficulty":"简单","id":"395","sourceUrl":"https://www.bilibili.com/video/BV1xxx395"},{"name":"牛肉肠粉","category":"早餐","ingredients":["大米粉","牛肉"],"steps":["米浆摊平","加牛肉蒸熟","卷起切段","淋酱油"],"time":25,"difficulty":"中等","id":"396","sourceUrl":"https://www.bilibili.com/video/BV1xxx396"},{"name":"叉烧肠粉","category":"早餐","ingredients":["大米粉","猪肉"],"steps":["米浆摊平","加叉烧蒸熟","卷起切段","淋酱油"],"time":25,"difficulty":"中等","id":"397","sourceUrl":"https://www.bilibili.com/video/BV1xxx397"},{"name":"广式早茶虾饺","category":"早餐","ingredients":["饺子皮","虾仁","猪肉"],"steps":["虾仁猪肉调馅","包成虾饺","大火蒸8分钟","装盘"],"time":40,"difficulty":"中等","id":"398","sourceUrl":"https://www.bilibili.com/video/BV1xxx398"},{"name":"糯米鸡","category":"早餐","ingredients":["糯米","鸡肉","香菇"],"steps":["糯米泡发","鸡肉香菇炒熟","荷叶包裹","蒸熟"],"time":90,"difficulty":"中等","id":"399","sourceUrl":"https://www.bilibili.com/video/BV1xxx399"},{"name":"荷叶饭","category":"早餐","ingredients":["米饭","鸡肉","香菇"],"steps":["米饭蒸熟","鸡肉香菇炒熟","荷叶包裹蒸制","即可食用"],"time":60,"difficulty":"中等","id":"400","sourceUrl":"https://www.bilibili.com/video/BV1xxx400"},{"name":"叉烧酥","category":"早餐","ingredients":["面粉","猪肉"],"steps":["面粉做酥皮","叉烧切丁做馅","包成酥","烤至金黄"],"time":70,"difficulty":"困难","id":"401","sourceUrl":"https://www.bilibili.com/video/BV1xxx401"},{"name":"菠萝包","category":"早餐","ingredients":["面粉","糖"],"steps":["面粉发酵","做酥皮","包在面团上","烤至金黄"],"time":80,"difficulty":"中等","id":"402","sourceUrl":"https://www.bilibili.com/video/BV1xxx402"},{"name":"吐司披萨","category":"早餐","ingredients":["吐司","奶酪","火腿"],"steps":["吐司片上放火腿","撒奶酪","烤至融化","切块"],"time":15,"difficulty":"简单","id":"403","sourceUrl":"https://www.bilibili.com/video/BV1xxx403"},{"name":"香蕉吐司卷","category":"早餐","ingredients":["吐司","香蕉","鸡蛋"],"steps":["吐司擀薄","卷入香蕉","裹蛋液煎熟","切段"],"time":15,"difficulty":"简单","id":"404","sourceUrl":"https://www.bilibili.com/video/BV1xxx404"},{"name":"牛油果吐司","category":"早餐","ingredients":["吐司","牛油果","鸡蛋"],"steps":["牛油果捣泥","吐司烤脆","抹上牛油果","放上煎蛋"],"time":10,"difficulty":"简单","id":"405","sourceUrl":"https://www.bilibili.com/video/BV1xxx405"},{"name":"燕麦粥","category":"早餐","ingredients":["燕麦","牛奶"],"steps":["牛奶煮开","加入燕麦","煮3分钟","盛出"],"time":5,"difficulty":"简单","id":"406","sourceUrl":"https://www.bilibili.com/video/BV1xxx406"},{"name":"玉米","category":"早餐","ingredients":["玉米"],"steps":["玉米洗净","水煮或蒸熟","即可食用"],"time":20,"difficulty":"简单","id":"407","sourceUrl":"https://www.bilibili.com/video/BV1xxx407"},{"name":"红薯","category":"早餐","ingredients":["红薯"],"steps":["红薯洗净","蒸熟或烤熟","即可食用"],"time":40,"difficulty":"简单","id":"408","sourceUrl":"https://www.bilibili.com/video/BV1xxx408"},{"name":"紫薯","category":"早餐","ingredients":["紫薯"],"steps":["紫薯洗净","蒸熟","即可食用"],"time":30,"difficulty":"简单","id":"409","sourceUrl":"https://www.bilibili.com/video/BV1xxx409"},{"name":"水煮蛋","category":"早餐","ingredients":["鸡蛋"],"steps":["鸡蛋冷水下锅","煮8分钟","捞出过凉水","剥壳"],"time":10,"difficulty":"简单","id":"410","sourceUrl":"https://www.bilibili.com/video/BV1xxx410"},{"name":"煎蛋","category":"早餐","ingredients":["鸡蛋"],"steps":["热锅倒油","打入鸡蛋","煎至两面金黄","撒盐"],"time":5,"difficulty":"简单","id":"411","sourceUrl":"https://www.bilibili.com/video/BV1xxx411"},{"name":"茶叶蛋","category":"早餐","ingredients":["鸡蛋","茶叶"],"steps":["鸡蛋煮熟敲裂","加茶叶香料煮","浸泡入味"],"time":60,"difficulty":"简单","id":"412","sourceUrl":"https://www.bilibili.com/video/BV1xxx412"},{"name":"溏心蛋","category":"早餐","ingredients":["鸡蛋"],"steps":["水烧开","放入鸡蛋煮6分钟","捞出过冰水","剥壳"],"time":8,"difficulty":"简单","id":"413","sourceUrl":"https://www.bilibili.com/video/BV1xxx413"},{"name":"干锅花菜","category":"素菜","ingredients":["花菜","干辣椒"],"steps":["花菜焯水","爆香干辣椒","倒入花菜翻炒","调味"],"time":15,"difficulty":"简单","id":"414","sourceUrl":"https://www.bilibili.com/video/BV1xxx414"},{"name":"干锅土豆片","category":"素菜","ingredients":["土豆","干辣椒","青椒"],"steps":["土豆片煎黄","爆香辣椒","加入青椒","倒入土豆炒匀"],"time":25,"difficulty":"中等","id":"415","sourceUrl":"https://www.bilibili.com/video/BV1xxx415"},{"name":"蒜蓉粉丝娃娃菜","category":"素菜","ingredients":["娃娃菜","粉丝","大蒜"],"steps":["粉丝泡软铺底","娃娃菜摆在上面","撒蒜蓉","蒸8分钟"],"time":20,"difficulty":"简单","id":"416","sourceUrl":"https://www.bilibili.com/video/BV1xxx416"},{"name":"上汤娃娃菜","category":"素菜","ingredients":["娃娃菜","皮蛋"],"steps":["娃娃菜切瓣","皮蛋切块","煮高汤","放入娃娃菜煮熟"],"time":20,"difficulty":"简单","id":"417","sourceUrl":"https://www.bilibili.com/video/BV1xxx417"},{"name":"清炒时蔬","category":"素菜","ingredients":["生菜"],"steps":["青菜洗净","热锅快炒","加盐调味","出锅"],"time":5,"difficulty":"简单","id":"418","sourceUrl":"https://www.bilibili.com/video/BV1xxx418"},{"name":"蒜蓉空心菜","category":"素菜","ingredients":["空心菜","大蒜"],"steps":["空心菜洗净","大蒜切末","炒香蒜末","大火快炒"],"time":5,"difficulty":"简单","id":"419","sourceUrl":"https://www.bilibili.com/video/BV1xxx419"},{"name":"白灼芥蓝","category":"素菜","ingredients":["芥蓝","大蒜"],"steps":["芥蓝洗净","开水焯熟","捞出","淋蒜茸豉油"],"time":10,"difficulty":"简单","id":"420","sourceUrl":"https://www.bilibili.com/video/BV1xxx420"},{"name":"香菇油菜","category":"素菜","ingredients":["油菜","香菇"],"steps":["香菇泡发切片","油菜焯水","炒香香菇","浇在油菜上"],"time":15,"difficulty":"简单","id":"421","sourceUrl":"https://www.bilibili.com/video/BV1xxx421"},{"name":"西芹百合","category":"素菜","ingredients":["芹菜","百合"],"steps":["芹菜切段","百合剥开","一起焯水","快炒调味"],"time":10,"difficulty":"简单","id":"422","sourceUrl":"https://www.bilibili.com/video/BV1xxx422"},{"name":"荷塘月色","category":"素菜","ingredients":["莲藕","木耳","荷兰豆"],"steps":["莲藕切片","木耳泡发","荷兰豆焯水","一起快炒"],"time":15,"difficulty":"中等","id":"423","sourceUrl":"https://www.bilibili.com/video/BV1xxx423"},{"name":"松仁玉米","category":"素菜","ingredients":["玉米粒","胡萝卜","黄瓜"],"steps":["玉米粒胡萝卜丁焯水","热锅炒香松仁","倒入蔬菜翻炒","调味"],"time":15,"difficulty":"简单","id":"424","sourceUrl":"https://www.bilibili.com/video/BV1xxx424"},{"name":"麻婆豆腐","category":"素菜","ingredients":["豆腐"],"steps":["豆腐切块焯水","炒香豆瓣酱","加入豆腐和水","勾芡"],"time":15,"difficulty":"简单","id":"425","sourceUrl":"https://www.bilibili.com/video/BV1xxx425"},{"name":"香煎豆腐","category":"素菜","ingredients":["豆腐"],"steps":["豆腐切块","两面煎至金黄","撒上盐和胡椒","出锅"],"time":15,"difficulty":"简单","id":"426","sourceUrl":"https://www.bilibili.com/video/BV1xxx426"},{"name":"凉拌黄瓜","category":"素菜","ingredients":["黄瓜","大蒜"],"steps":["黄瓜拍碎切段","蒜泥调料拌匀","腌制入味"],"time":10,"difficulty":"简单","id":"427","sourceUrl":"https://www.bilibili.com/video/BV1xxx427"},{"name":"凉拌腐竹","category":"素菜","ingredients":["腐竹","黄瓜"],"steps":["腐竹泡发焯水","黄瓜切丝","加调料拌匀"],"time":10,"difficulty":"简单","id":"428","sourceUrl":"https://www.bilibili.com/video/BV1xxx428"},{"name":"凉拌豆皮","category":"素菜","ingredients":["豆皮","黄瓜"],"steps":["豆皮切丝焯水","黄瓜切丝","加调料拌匀"],"time":10,"difficulty":"简单","id":"429","sourceUrl":"https://www.bilibili.com/video/BV1xxx429"},{"name":"凉拌豆腐丝","category":"素菜","ingredients":["豆干","黄瓜"],"steps":["豆干切丝","黄瓜切丝","加调料拌匀"],"time":10,"difficulty":"简单","id":"430","sourceUrl":"https://www.bilibili.com/video/BV1xxx430"},{"name":"糖拌西红柿","category":"素菜","ingredients":["番茄","糖"],"steps":["番茄切块","撒上白糖","腌制10分钟","即可食用"],"time":10,"difficulty":"简单","id":"431","sourceUrl":"https://www.bilibili.com/video/BV1xxx431"},{"name":"凉拌西红柿","category":"素菜","ingredients":["番茄"],"steps":["番茄切片","加糖和醋","拌匀","腌制"],"time":10,"difficulty":"简单","id":"432","sourceUrl":"https://www.bilibili.com/video/BV1xxx432"},{"name":"蒜泥茄子","category":"素菜","ingredients":["茄子","大蒜"],"steps":["茄子蒸熟","撕成条","加蒜泥调料","拌匀"],"time":20,"difficulty":"简单","id":"433","sourceUrl":"https://www.bilibili.com/video/BV1xxx433"},{"name":"擂椒皮蛋","category":"素菜","ingredients":["青椒","皮蛋"],"steps":["青椒烤至虎皮","皮蛋切块","一起擂碎","加调料"],"time":15,"difficulty":"简单","id":"434","sourceUrl":"https://www.bilibili.com/video/BV1xxx434"},{"name":"老醋花生","category":"素菜","ingredients":["花生","洋葱","青椒"],"steps":["花生炸熟","洋葱青椒切丁","加老醋拌匀"],"time":15,"difficulty":"简单","id":"435","sourceUrl":"https://www.bilibili.com/video/BV1xxx435"},{"name":"凉拌三丝","category":"素菜","ingredients":["胡萝卜","黄瓜","粉丝"],"steps":["三丝切丝焯水","加调料拌匀","撒香菜"],"time":15,"difficulty":"简单","id":"436","sourceUrl":"https://www.bilibili.com/video/BV1xxx436"},{"name":"大拌菜","category":"素菜","ingredients":["生菜","黄瓜","番茄","紫甘蓝"],"steps":["蔬菜洗净切块","加调料拌匀","即可食用"],"time":10,"difficulty":"简单","id":"437","sourceUrl":"https://www.bilibili.com/video/BV1xxx437"},{"name":"蔬菜沙拉","category":"素菜","ingredients":["生菜","黄瓜","番茄"],"steps":["蔬菜洗净切块","加入沙拉酱","拌匀"],"time":10,"difficulty":"简单","id":"438","sourceUrl":"https://www.bilibili.com/video/BV1xxx438"},{"name":"水果沙拉","category":"素菜","ingredients":["香蕉","苹果","酸奶"],"steps":["水果切块","加入酸奶","拌匀"],"time":10,"difficulty":"简单","id":"439","sourceUrl":"https://www.bilibili.com/video/BV1xxx439"},{"name":"蒸南瓜","category":"素菜","ingredients":["南瓜"],"steps":["南瓜切块","上锅蒸熟","即可食用"],"time":20,"difficulty":"简单","id":"440","sourceUrl":"https://www.bilibili.com/video/BV1xxx440"},{"name":"蒸红薯","category":"素菜","ingredients":["红薯"],"steps":["红薯洗净","蒸熟","即可食用"],"time":40,"difficulty":"简单","id":"441","sourceUrl":"https://www.bilibili.com/video/BV1xxx441"},{"name":"煮玉米","category":"素菜","ingredients":["玉米"],"steps":["玉米洗净","煮熟","即可食用"],"time":20,"difficulty":"简单","id":"442","sourceUrl":"https://www.bilibili.com/video/BV1xxx442"},{"name":"清炒山药","category":"素菜","ingredients":["山药"],"steps":["山药切片","焯水","热锅快炒","调味"],"time":10,"difficulty":"简单","id":"443","sourceUrl":"https://www.bilibili.com/video/BV1xxx443"},{"name":"醋溜白菜","category":"素菜","ingredients":["白菜","干辣椒"],"steps":["白菜切片","爆香干辣椒","大火快炒","加醋调味"],"time":10,"difficulty":"简单","id":"444","sourceUrl":"https://www.bilibili.com/video/BV1xxx444"},{"name":"醋溜土豆丝","category":"素菜","ingredients":["土豆","醋"],"steps":["土豆切丝泡水","热锅快炒","加醋调味","出锅"],"time":10,"difficulty":"简单","id":"445","sourceUrl":"https://www.bilibili.com/video/BV1xxx445"},{"name":"干锅杏鲍菇","category":"素菜","ingredients":["杏鲍菇","干辣椒","青椒"],"steps":["杏鲍菇切片煎黄","爆香干辣椒","加入青椒","炒匀"],"time":20,"difficulty":"中等","id":"446","sourceUrl":"https://www.bilibili.com/video/BV1xxx446"},{"name":"干煸杏鲍菇","category":"素菜","ingredients":["杏鲍菇","干辣椒"],"steps":["杏鲍菇撕条","干煸至干香","加入干辣椒炒匀","调味"],"time":20,"difficulty":"中等","id":"447","sourceUrl":"https://www.bilibili.com/video/BV1xxx447"},{"name":"金针菇日本豆腐","category":"素菜","ingredients":["金针菇","豆腐"],"steps":["日本豆腐切块煎黄","金针菇焯水","一起炒","加料汁"],"time":15,"difficulty":"简单","id":"448","sourceUrl":"https://www.bilibili.com/video/BV1xxx448"},{"name":"蒜蓉金针菇","category":"素菜","ingredients":["金针菇","大蒜"],"steps":["金针菇洗净","铺在盘中","撒蒜蓉","蒸8分钟"],"time":15,"difficulty":"简单","id":"449","sourceUrl":"https://www.bilibili.com/video/BV1xxx449"},{"name":"烤金针菇","category":"素菜","ingredients":["金针菇","蒜蓉"],"steps":["金针菇洗净","放锡纸上","撒蒜蓉调料","烤15分钟"],"time":20,"difficulty":"简单","id":"450","sourceUrl":"https://www.bilibili.com/video/BV1xxx450"},{"name":"烤茄子","category":"素菜","ingredients":["茄子","蒜蓉"],"steps":["茄子烤软","划开","撒蒜蓉调料","再烤5分钟"],"time":25,"difficulty":"简单","id":"451","sourceUrl":"https://www.bilibili.com/video/BV1xxx451"},{"name":"烤韭菜","category":"素菜","ingredients":["韭菜"],"steps":["韭菜洗净","刷油撒调料","烤至断生","装盘"],"time":10,"difficulty":"简单","id":"452","sourceUrl":"https://www.bilibili.com/video/BV1xxx452"},{"name":"烤玉米","category":"素菜","ingredients":["玉米"],"steps":["玉米刷油","撒盐和辣椒","烤至金黄","装盘"],"time":20,"difficulty":"简单","id":"453","sourceUrl":"https://www.bilibili.com/video/BV1xxx453"},{"name":"拔丝红薯","category":"素菜","ingredients":["红薯","糖"],"steps":["红薯切块炸熟","熬糖浆","倒入红薯翻炒","拉丝装盘"],"time":30,"difficulty":"中等","id":"454","sourceUrl":"https://www.bilibili.com/video/BV1xxx454"},{"name":"拔丝山药","category":"素菜","ingredients":["山药","糖"],"steps":["山药切块炸熟","熬糖浆","倒入山药翻炒","拉丝"],"time":30,"difficulty":"中等","id":"455","sourceUrl":"https://www.bilibili.com/video/BV1xxx455"},{"name":"番茄蛋花汤","category":"汤羹","ingredients":["番茄","鸡蛋"],"steps":["番茄炒软加水","煮开","倒入蛋液","调味"],"time":10,"difficulty":"简单","id":"456","sourceUrl":"https://www.bilibili.com/video/BV1xxx456"},{"name":"紫菜蛋花汤","category":"汤羹","ingredients":["紫菜","鸡蛋"],"steps":["水烧开","放入紫菜","倒入蛋液","调味"],"time":8,"difficulty":"简单","id":"457","sourceUrl":"https://www.bilibili.com/video/BV1xxx457"},{"name":"萝卜牛腩汤","category":"汤羹","ingredients":["牛肉","白萝卜"],"steps":["牛肉焯水","萝卜切块","炖煮1小时","调味"],"time":90,"difficulty":"中等","id":"458","sourceUrl":"https://www.bilibili.com/video/BV1xxx458"},{"name":"玉米排骨汤","category":"汤羹","ingredients":["排骨","玉米","胡萝卜"],"steps":["排骨焯水","玉米胡萝卜切段","一起炖煮","调味"],"time":60,"difficulty":"简单","id":"459","sourceUrl":"https://www.bilibili.com/video/BV1xxx459"},{"name":"莲藕排骨汤","category":"汤羹","ingredients":["排骨","莲藕"],"steps":["排骨焯水","莲藕切块","炖煮1小时","调味"],"time":70,"difficulty":"简单","id":"460","sourceUrl":"https://www.bilibili.com/video/BV1xxx460"},{"name":"海带排骨汤","category":"汤羹","ingredients":["排骨","海带"],"steps":["排骨焯水","海带泡发","一起炖煮","调味"],"time":60,"difficulty":"简单","id":"461","sourceUrl":"https://www.bilibili.com/video/BV1xxx461"},{"name":"黄豆猪蹄汤","category":"汤羹","ingredients":["猪蹄","黄豆"],"steps":["猪蹄焯水","黄豆泡发","炖煮1.5小时","调味"],"time":100,"difficulty":"中等","id":"462","sourceUrl":"https://www.bilibili.com/video/BV1xxx462"},{"name":"花生猪脚汤","category":"汤羹","ingredients":["猪蹄","花生"],"steps":["猪蹄焯水","花生泡发","炖煮1.5小时","调味"],"time":100,"difficulty":"中等","id":"463","sourceUrl":"https://www.bilibili.com/video/BV1xxx463"},{"name":"乌鸡汤","category":"汤羹","ingredients":["鸡肉","枸杞"],"steps":["乌鸡处理干净","加水炖煮","小火1.5小时","调味"],"time":100,"difficulty":"简单","id":"464","sourceUrl":"https://www.bilibili.com/video/BV1xxx464"},{"name":"老母鸡汤","category":"汤羹","ingredients":["鸡肉","香菇"],"steps":["老母鸡处理干净","加水炖煮","加香菇","小火2小时"],"time":140,"difficulty":"简单","id":"465","sourceUrl":"https://www.bilibili.com/video/BV1xxx465"},{"name":"鸡汤","category":"汤羹","ingredients":["鸡肉","蘑菇"],"steps":["鸡肉处理干净","加水炖煮","加蘑菇","小火1小时"],"time":70,"difficulty":"简单","id":"466","sourceUrl":"https://www.bilibili.com/video/BV1xxx466"},{"name":"鱼头豆腐汤","category":"汤羹","ingredients":["鱼","豆腐"],"steps":["鱼头煎至两面","加开水煮开","加豆腐","小火煮20分钟"],"time":35,"difficulty":"中等","id":"467","sourceUrl":"https://www.bilibili.com/video/BV1xxx467"},{"name":"鲫鱼豆腐汤","category":"汤羹","ingredients":["鱼","豆腐"],"steps":["鲫鱼煎香","加开水煮开","加豆腐","煮20分钟"],"time":35,"difficulty":"简单","id":"468","sourceUrl":"https://www.bilibili.com/video/BV1xxx468"},{"name":"鲈鱼汤","category":"汤羹","ingredients":["鱼","豆腐"],"steps":["鲈鱼煎至金黄","加开水","加豆腐","煮15分钟"],"time":30,"difficulty":"简单","id":"469","sourceUrl":"https://www.bilibili.com/video/BV1xxx469"},{"name":"胡辣汤","category":"汤羹","ingredients":["豆腐","木耳","面筋"],"steps":["豆腐木耳切丝","加水煮开","加面筋","加胡辣粉"],"time":20,"difficulty":"简单","id":"470","sourceUrl":"https://www.bilibili.com/video/BV1xxx470"},{"name":"西湖牛肉羹","category":"汤羹","ingredients":["牛肉","豆腐","鸡蛋"],"steps":["牛肉剁碎","豆腐切丁","加水煮开","勾芡倒蛋液"],"time":20,"difficulty":"中等","id":"471","sourceUrl":"https://www.bilibili.com/video/BV1xxx471"},{"name":"银耳莲子汤","category":"汤羹","ingredients":["银耳","莲子","冰糖"],"steps":["银耳泡发","莲子泡发","加水炖煮","加冰糖"],"time":90,"difficulty":"简单","id":"472","sourceUrl":"https://www.bilibili.com/video/BV1xxx472"},{"name":"红枣银耳汤","category":"汤羹","ingredients":["银耳","红枣","冰糖"],"steps":["银耳泡发","红枣去核","加水炖煮","加冰糖"],"time":90,"difficulty":"简单","id":"473","sourceUrl":"https://www.bilibili.com/video/BV1xxx473"},{"name":"冰糖雪梨","category":"汤羹","ingredients":["雪梨","冰糖"],"steps":["雪梨去核","加冰糖","炖煮30分钟","即可食用"],"time":40,"difficulty":"简单","id":"474","sourceUrl":"https://www.bilibili.com/video/BV1xxx474"},{"name":"南瓜汤","category":"汤羹","ingredients":["南瓜","牛奶"],"steps":["南瓜蒸熟","加牛奶打成糊","煮开","调味"],"time":25,"difficulty":"简单","id":"475","sourceUrl":"https://www.bilibili.com/video/BV1xxx475"},{"name":"玉米浓汤","category":"汤羹","ingredients":["玉米","牛奶"],"steps":["玉米粒加牛奶","打成糊","煮开","调味"],"time":20,"difficulty":"简单","id":"476","sourceUrl":"https://www.bilibili.com/video/BV1xxx476"},{"name":"罗宋汤","category":"汤羹","ingredients":["牛肉","番茄","土豆","洋葱"],"steps":["牛肉炖煮","加入番茄土豆洋葱","炖至软烂","调味"],"time":90,"difficulty":"中等","id":"477","sourceUrl":"https://www.bilibili.com/video/BV1xxx477"},{"name":"味噌汤","category":"汤羹","ingredients":["豆腐","海带","味噌"],"steps":["海带煮汤","加入豆腐","味噌化开","煮开"],"time":15,"difficulty":"简单","id":"478","sourceUrl":"https://www.bilibili.com/video/BV1xxx478"},{"name":"海带豆腐汤","category":"汤羹","ingredients":["海带","豆腐"],"steps":["海带泡发","豆腐切块","一起煮汤","调味"],"time":15,"difficulty":"简单","id":"479","sourceUrl":"https://www.bilibili.com/video/BV1xxx479"},{"name":"菠菜鸡蛋汤","category":"汤羹","ingredients":["菠菜","鸡蛋"],"steps":["菠菜焯水","加水煮开","倒入蛋液","调味"],"time":10,"difficulty":"简单","id":"480","sourceUrl":"https://www.bilibili.com/video/BV1xxx480"},{"name":"丝瓜蛋汤","category":"汤羹","ingredients":["丝瓜","鸡蛋"],"steps":["丝瓜切块","加水煮开","倒入蛋液","调味"],"time":10,"difficulty":"简单","id":"481","sourceUrl":"https://www.bilibili.com/video/BV1xxx481"},{"name":"番茄牛腩汤","category":"汤羹","ingredients":["牛肉","番茄"],"steps":["牛肉焯水","番茄炒软","一起炖煮","调味"],"time":100,"difficulty":"中等","id":"482","sourceUrl":"https://www.bilibili.com/video/BV1xxx482"},{"name":"菌菇汤","category":"汤羹","ingredients":["香菇","金针菇","蘑菇"],"steps":["菌菇洗净","加水煮开","小火煮20分钟","调味"],"time":25,"difficulty":"简单","id":"483","sourceUrl":"https://www.bilibili.com/video/BV1xxx483"},{"name":"虫草花鸡汤","category":"汤羹","ingredients":["鸡肉","虫草花"],"steps":["鸡肉处理干净","加虫草花","炖煮1.5小时","调味"],"time":100,"difficulty":"简单","id":"484","sourceUrl":"https://www.bilibili.com/video/BV1xxx484"},{"name":"当归生姜羊肉汤","category":"汤羹","ingredients":["羊肉","生姜"],"steps":["羊肉焯水","加生姜当归","炖煮2小时","调味"],"time":130,"difficulty":"中等","id":"485","sourceUrl":"https://www.bilibili.com/video/BV1xxx485"},{"name":"老鸭汤","category":"汤羹","ingredients":["鸭肉"],"steps":["老鸭处理干净","加水炖煮","小火2小时","调味"],"time":130,"difficulty":"简单","id":"486","sourceUrl":"https://www.bilibili.com/video/BV1xxx486"},{"name":"酸萝卜老鸭汤","category":"汤羹","ingredients":["鸭肉","酸萝卜"],"steps":["老鸭处理干净","加酸萝卜","炖煮2小时","调味"],"time":140,"difficulty":"中等","id":"487","sourceUrl":"https://www.bilibili.com/video/BV1xxx487"},{"name":"椰子鸡汤","category":"汤羹","ingredients":["鸡肉","椰子"],"steps":["鸡肉切块","椰子取水和肉","一起炖煮","调味"],"time":90,"difficulty":"中等","id":"488","sourceUrl":"https://www.bilibili.com/video/BV1xxx488"},{"name":"猪肚鸡汤","category":"汤羹","ingredients":["鸡肉","猪肚","胡椒"],"steps":["鸡肉猪肚处理干净","加水炖煮","小火2小时","调味"],"time":130,"difficulty":"中等","id":"489","sourceUrl":"https://www.bilibili.com/video/BV1xxx489"},{"name":"鲍鱼鸡汤","category":"汤羹","ingredients":["鸡肉","鲍鱼"],"steps":["鸡肉鲍鱼处理干净","加水炖煮","小火1.5小时","调味"],"time":100,"difficulty":"中等","id":"490","sourceUrl":"https://www.bilibili.com/video/BV1xxx490"},{"name":"干贝冬瓜汤","category":"汤羹","ingredients":["干贝","冬瓜"],"steps":["干贝泡发","冬瓜切块","一起煮汤","调味"],"time":35,"difficulty":"中等","id":"491","sourceUrl":"https://www.bilibili.com/video/BV1xxx491"},{"name":"丝瓜蛤蜊汤","category":"汤羹","ingredients":["丝瓜","蛤蜊"],"steps":["丝瓜切块","蛤蜊吐沙","一起煮汤","蛤蜊开口即可"],"time":20,"difficulty":"简单","id":"492","sourceUrl":"https://www.bilibili.com/video/BV1xxx492"},{"name":"番茄鱼片汤","category":"汤羹","ingredients":["鱼","番茄"],"steps":["鱼片腌制","番茄炒软加水","放入鱼片","煮熟调味"],"time":25,"difficulty":"中等","id":"493","sourceUrl":"https://www.bilibili.com/video/BV1xxx493"},{"name":"豆腐鲫鱼汤","category":"汤羹","ingredients":["鱼","豆腐"],"steps":["鲫鱼煎香","加开水","加豆腐","煮20分钟"],"time":35,"difficulty":"简单","id":"494","sourceUrl":"https://www.bilibili.com/video/BV1xxx494"},{"name":"萝卜丝虾皮汤","category":"汤羹","ingredients":["白萝卜","虾皮"],"steps":["萝卜擦丝","加水煮开","加入虾皮","调味"],"time":15,"difficulty":"简单","id":"495","sourceUrl":"https://www.bilibili.com/video/BV1xxx495"},{"name":"紫菜豆腐汤","category":"汤羹","ingredients":["紫菜","豆腐"],"steps":["水烧开","放入豆腐","加紫菜","调味"],"time":10,"difficulty":"简单","id":"496","sourceUrl":"https://www.bilibili.com/video/BV1xxx496"},{"name":"黄瓜蛋汤","category":"汤羹","ingredients":["黄瓜","鸡蛋"],"steps":["黄瓜切片","加水煮开","倒入蛋液","调味"],"time":10,"difficulty":"简单","id":"497","sourceUrl":"https://www.bilibili.com/video/BV1xxx497"},{"name":"生菜蛋汤","category":"汤羹","ingredients":["生菜","鸡蛋"],"steps":["生菜洗净","加水煮开","倒入蛋液","调味"],"time":10,"difficulty":"简单","id":"498","sourceUrl":"https://www.bilibili.com/video/BV1xxx498"},{"name":"冬瓜虾皮汤","category":"汤羹","ingredients":["冬瓜","虾皮"],"steps":["冬瓜切块","加水煮开","加入虾皮","调味"],"time":15,"difficulty":"简单","id":"499","sourceUrl":"https://www.bilibili.com/video/BV1xxx499"},{"name":"花生猪手汤","category":"汤羹","ingredients":["猪蹄","花生"],"steps":["猪蹄焯水","花生泡发","炖煮1.5小时","调味"],"time":100,"difficulty":"中等","id":"500","sourceUrl":"https://www.bilibili.com/video/BV1xxx500"},{"name":"陈皮红豆沙","category":"汤羹","ingredients":["红豆","陈皮","冰糖"],"steps":["红豆泡发","加陈皮炖煮","小火1.5小时","加冰糖"],"time":120,"difficulty":"简单","id":"501","sourceUrl":"https://www.bilibili.com/video/BV1xxx501"},{"name":"桂花糖藕","category":"汤羹","ingredients":["莲藕","糯米","糖桂花"],"steps":["莲藕洗净切盖","塞入糯米","加糖炖煮","切片淋桂花"],"time":120,"difficulty":"中等","id":"502","sourceUrl":"https://www.bilibili.com/video/BV1xxx502"},{"name":"柠檬鸡爪","category":"凉菜","ingredients":["鸡爪","柠檬"],"steps":["鸡爪煮熟过冰水","加柠檬调料","冷藏入味"],"time":120,"difficulty":"中等","id":"503","sourceUrl":"https://www.bilibili.com/video/BV1xxx503"},{"name":"盐水鸭","category":"凉菜","ingredients":["鸭肉"],"steps":["鸭肉腌制","加水煮熟","晾凉切块"],"time":80,"difficulty":"中等","id":"504","sourceUrl":"https://www.bilibili.com/video/BV1xxx504"},{"name":"酱牛肉","category":"凉菜","ingredients":["牛肉"],"steps":["牛肉腌制","放入卤水中","小火煮1小时","晾凉切片"],"time":90,"difficulty":"中等","id":"505","sourceUrl":"https://www.bilibili.com/video/BV1xxx505"},{"name":"卤蛋","category":"凉菜","ingredients":["鸡蛋"],"steps":["鸡蛋煮熟敲裂","放入卤水中","小火煮30分钟","浸泡"],"time":50,"difficulty":"简单","id":"506","sourceUrl":"https://www.bilibili.com/video/BV1xxx506"},{"name":"五香花生","category":"凉菜","ingredients":["花生"],"steps":["花生洗净","加五香调料煮","小火煮30分钟","浸泡入味"],"time":50,"difficulty":"简单","id":"507","sourceUrl":"https://www.bilibili.com/video/BV1xxx507"},{"name":"凉拌藕片","category":"凉菜","ingredients":["莲藕"],"steps":["莲藕切片焯水","加调料拌匀","冷藏"],"time":15,"difficulty":"简单","id":"508","sourceUrl":"https://www.bilibili.com/video/BV1xxx508"},{"name":"凉拌莴笋","category":"凉菜","ingredients":["莴笋"],"steps":["莴笋切丝","加盐腌出水","挤干加调料"],"time":15,"difficulty":"简单","id":"509","sourceUrl":"https://www.bilibili.com/video/BV1xxx509"},{"name":"凉拌黄瓜木耳","category":"凉菜","ingredients":["黄瓜","木耳"],"steps":["木耳泡发焯水","黄瓜拍碎","加调料拌匀"],"time":10,"difficulty":"简单","id":"510","sourceUrl":"https://www.bilibili.com/video/BV1xxx510"},{"name":"凉拌海带豆腐丝","category":"凉菜","ingredients":["海带","豆皮"],"steps":["海带豆皮切丝焯水","加调料拌匀"],"time":10,"difficulty":"简单","id":"511","sourceUrl":"https://www.bilibili.com/video/BV1xxx511"},{"name":"凉拌皮蛋","category":"凉菜","ingredients":["皮蛋","青椒"],"steps":["皮蛋切块","青椒切丁","加调料拌匀"],"time":10,"difficulty":"简单","id":"512","sourceUrl":"https://www.bilibili.com/video/BV1xxx512"},{"name":"凉拌粉丝","category":"凉菜","ingredients":["粉丝","黄瓜","胡萝卜"],"steps":["粉丝泡软焯水","黄瓜胡萝卜切丝","加调料"],"time":10,"difficulty":"简单","id":"513","sourceUrl":"https://www.bilibili.com/video/BV1xxx513"},{"name":"东北大拉皮","category":"凉菜","ingredients":["拉皮","黄瓜","胡萝卜"],"steps":["拉皮切条焯水","黄瓜胡萝卜切丝","加麻酱拌匀"],"time":15,"difficulty":"简单","id":"514","sourceUrl":"https://www.bilibili.com/video/BV1xxx514"},{"name":"凉面","category":"凉菜","ingredients":["面条","黄瓜","豆芽"],"steps":["面条煮熟过凉水","加配菜调料","拌匀"],"time":15,"difficulty":"简单","id":"515","sourceUrl":"https://www.bilibili.com/video/BV1xxx515"},{"name":"鸡丝凉面","category":"凉菜","ingredients":["面条","鸡肉","黄瓜"],"steps":["鸡肉煮熟撕丝","面条煮熟过凉水","加鸡丝黄瓜调料"],"time":25,"difficulty":"中等","id":"516","sourceUrl":"https://www.bilibili.com/video/BV1xxx516"},{"name":"麻辣凉面","category":"凉菜","ingredients":["面条","黄瓜","花生"],"steps":["面条煮熟过凉水","加黄瓜花生","麻辣调料拌匀"],"time":15,"difficulty":"简单","id":"517","sourceUrl":"https://www.bilibili.com/video/BV1xxx517"},{"name":"芝麻酱凉面","category":"凉菜","ingredients":["面条","黄瓜","芝麻酱"],"steps":["芝麻酱调开","黄瓜切丝","面条煮熟过凉水","拌匀"],"time":15,"difficulty":"简单","id":"518","sourceUrl":"https://www.bilibili.com/video/BV1xxx518"},{"name":"酸辣蕨根粉","category":"凉菜","ingredients":["蕨根粉","黄瓜"],"steps":["蕨根粉泡软焯水","黄瓜切丝","酸辣调料拌匀"],"time":15,"difficulty":"简单","id":"519","sourceUrl":"https://www.bilibili.com/video/BV1xxx519"},{"name":"芥末木耳","category":"凉菜","ingredients":["木耳","芥末"],"steps":["木耳泡发焯水","调芥末汁","拌匀"],"time":10,"difficulty":"简单","id":"520","sourceUrl":"https://www.bilibili.com/video/BV1xxx520"},{"name":"水晶肴肉","category":"凉菜","ingredients":["猪蹄"],"steps":["猪蹄煮熟去骨","加调料煮冻","冷藏切片"],"time":180,"difficulty":"困难","id":"521","sourceUrl":"https://www.bilibili.com/video/BV1xxx521"},{"name":"酱肘花","category":"凉菜","ingredients":["猪蹄"],"steps":["猪蹄煮熟","去骨卷紧","冷藏切片"],"time":150,"difficulty":"中等","id":"522","sourceUrl":"https://www.bilibili.com/video/BV1xxx522"},{"name":"皮蛋豆腐","category":"凉菜","ingredients":["皮蛋","豆腐"],"steps":["豆腐切块","皮蛋切块","加调料拌匀"],"time":10,"difficulty":"简单","id":"523","sourceUrl":"https://www.bilibili.com/video/BV1xxx523"},{"name":"香椿拌豆腐","category":"凉菜","ingredients":["香椿","豆腐"],"steps":["香椿焯水切碎","豆腐切块","加调料拌匀"],"time":15,"difficulty":"简单","id":"524","sourceUrl":"https://www.bilibili.com/video/BV1xxx524"},{"name":"小葱拌豆腐","category":"凉菜","ingredients":["豆腐","小葱"],"steps":["豆腐切块","小葱切碎","加调料拌匀"],"time":10,"difficulty":"简单","id":"525","sourceUrl":"https://www.bilibili.com/video/BV1xxx525"},{"name":"菠菜拌粉丝","category":"凉菜","ingredients":["菠菜","粉丝"],"steps":["菠菜焯水","粉丝泡软","加调料拌匀"],"time":10,"difficulty":"简单","id":"526","sourceUrl":"https://www.bilibili.com/video/BV1xxx526"},{"name":"凉拌金针菇","category":"凉菜","ingredients":["金针菇","黄瓜"],"steps":["金针菇焯水","黄瓜切丝","加调料拌匀"],"time":10,"difficulty":"简单","id":"527","sourceUrl":"https://www.bilibili.com/video/BV1xxx527"},{"name":"凉拌杏鲍菇","category":"凉菜","ingredients":["杏鲍菇","黄瓜"],"steps":["杏鲍菇蒸熟撕条","黄瓜切丝","加调料"],"time":15,"difficulty":"简单","id":"528","sourceUrl":"https://www.bilibili.com/video/BV1xxx528"},{"name":"凉拌鸡丝","category":"凉菜","ingredients":["鸡肉","黄瓜","胡萝卜"],"steps":["鸡肉煮熟撕丝","黄瓜胡萝卜切丝","加调料"],"time":25,"difficulty":"简单","id":"529","sourceUrl":"https://www.bilibili.com/video/BV1xxx529"},{"name":"棒棒鸡","category":"凉菜","ingredients":["鸡肉","黄瓜","花生"],"steps":["鸡肉煮熟捶松","黄瓜切片","红油料汁"],"time":30,"difficulty":"中等","id":"530","sourceUrl":"https://www.bilibili.com/video/BV1xxx530"},{"name":"怪味鸡","category":"凉菜","ingredients":["鸡肉"],"steps":["鸡肉煮熟切块","调怪味料汁","拌匀"],"time":30,"difficulty":"中等","id":"531","sourceUrl":"https://www.bilibili.com/video/BV1xxx531"},{"name":"椒麻鸡","category":"凉菜","ingredients":["鸡肉","花椒"],"steps":["鸡肉煮熟","椒麻料汁浸泡","切块"],"time":40,"difficulty":"中等","id":"532","sourceUrl":"https://www.bilibili.com/video/BV1xxx532"},{"name":"酸辣鸡爪","category":"凉菜","ingredients":["鸡爪","柠檬"],"steps":["鸡爪煮熟过冰水","加酸辣调料","冷藏入味"],"time":120,"difficulty":"中等","id":"533","sourceUrl":"https://www.bilibili.com/video/BV1xxx533"},{"name":"麻辣鸡丝","category":"凉菜","ingredients":["鸡肉","干辣椒"],"steps":["鸡肉煮熟撕丝","炸至微干","加麻辣调料拌匀"],"time":30,"difficulty":"中等","id":"534","sourceUrl":"https://www.bilibili.com/video/BV1xxx534"},{"name":"臭豆腐","category":"小吃","ingredients":["臭豆腐","蒜蓉","剁椒"],"steps":["臭豆腐油炸金黄","戳洞","浇汤汁撒香菜"],"time":20,"difficulty":"中等","id":"535","sourceUrl":"https://www.bilibili.com/video/BV1xxx535"},{"name":"烤冷面","category":"小吃","ingredients":["冷面","鸡蛋","火腿肠"],"steps":["冷面煎软","加鸡蛋翻面","放火腿肠刷酱卷起"],"time":15,"difficulty":"简单","id":"536","sourceUrl":"https://www.bilibili.com/video/BV1xxx536"},{"name":"铁板豆腐","category":"小吃","ingredients":["豆腐"],"steps":["豆腐切块","铁板煎两面金黄","刷酱撒料"],"time":15,"difficulty":"简单","id":"537","sourceUrl":"https://www.bilibili.com/video/BV1xxx537"},{"name":"狼牙土豆","category":"小吃","ingredients":["土豆"],"steps":["土豆切狼牙条","油炸金黄","拌入调料"],"time":20,"difficulty":"简单","id":"538","sourceUrl":"https://www.bilibili.com/video/BV1xxx538"},{"name":"章鱼小丸子","category":"小吃","ingredients":["面粉","章鱼"],"steps":["面粉调糊","加入章鱼丁","倒入模具煎熟","挤酱"],"time":30,"difficulty":"中等","id":"539","sourceUrl":"https://www.bilibili.com/video/BV1xxx539"},{"name":"可乐饼","category":"小吃","ingredients":["土豆","肉末"],"steps":["土豆蒸熟压泥","包入肉末","裹粉油炸"],"time":40,"difficulty":"中等","id":"540","sourceUrl":"https://www.bilibili.com/video/BV1xxx540"},{"name":"天妇罗","category":"小吃","ingredients":["虾仁","面粉"],"steps":["虾去壳","裹天妇罗糊","油炸金黄","蘸料"],"time":25,"difficulty":"中等","id":"541","sourceUrl":"https://www.bilibili.com/video/BV1xxx541"},{"name":"春卷","category":"小吃","ingredients":["春卷皮","猪肉","白菜"],"steps":["猪肉白菜调馅","用春卷皮包起","油炸金黄"],"time":40,"difficulty":"中等","id":"542","sourceUrl":"https://www.bilibili.com/video/BV1xxx542"},{"name":"龟苓膏","category":"小吃","ingredients":["龟苓膏粉","糖"],"steps":["龟苓膏粉加水煮化","倒入容器","冷藏凝固","加糖食用"],"time":40,"difficulty":"简单","id":"543","sourceUrl":"https://www.bilibili.com/video/BV1xxx543"},{"name":"凉粉","category":"小吃","ingredients":["凉粉","红糖"],"steps":["凉粉煮化","倒入容器凝固","切块","淋红糖浆"],"time":30,"difficulty":"简单","id":"544","sourceUrl":"https://www.bilibili.com/video/BV1xxx544"},{"name":"冰粉","category":"小吃","ingredients":["冰粉籽","红糖"],"steps":["冰粉籽搓出浆","静置凝固","切块淋红糖"],"time":40,"difficulty":"简单","id":"545","sourceUrl":"https://www.bilibili.com/video/BV1xxx545"},{"name":"糖葫芦","category":"小吃","ingredients":["山楂","糖"],"steps":["山楂串起","熬糖浆","裹上糖衣","晾凉"],"time":30,"difficulty":"简单","id":"546","sourceUrl":"https://www.bilibili.com/video/BV1xxx546"},{"name":"爆米花","category":"小吃","ingredients":["玉米粒"],"steps":["玉米粒放入锅中","加热爆开","加糖拌匀"],"time":10,"difficulty":"简单","id":"547","sourceUrl":"https://www.bilibili.com/video/BV1xxx547"},{"name":"炸薯条","category":"小吃","ingredients":["土豆"],"steps":["土豆切条","泡水沥干","油炸金黄","撒盐"],"time":20,"difficulty":"简单","id":"548","sourceUrl":"https://www.bilibili.com/video/BV1xxx548"},{"name":"炸鸡米花","category":"小吃","ingredients":["鸡肉","面粉"],"steps":["鸡肉切丁腌制","裹粉","油炸金黄"],"time":25,"difficulty":"简单","id":"549","sourceUrl":"https://www.bilibili.com/video/BV1xxx549"},{"name":"炸鸡排","category":"小吃","ingredients":["鸡肉","面粉"],"steps":["鸡肉拍松腌制","裹粉油炸","切块撒料"],"time":25,"difficulty":"简单","id":"550","sourceUrl":"https://www.bilibili.com/video/BV1xxx550"},{"name":"炸鸡翅","category":"小吃","ingredients":["鸡翅"],"steps":["鸡翅腌制","裹粉油炸","复炸一次"],"time":25,"difficulty":"简单","id":"551","sourceUrl":"https://www.bilibili.com/video/BV1xxx551"},{"name":"炸鸡腿","category":"小吃","ingredients":["鸡腿"],"steps":["鸡腿腌制","裹粉油炸","复炸一次"],"time":30,"difficulty":"简单","id":"552","sourceUrl":"https://www.bilibili.com/video/BV1xxx552"},{"name":"薯条","category":"小吃","ingredients":["土豆"],"steps":["土豆切条","油炸金黄","撒盐"],"time":20,"difficulty":"简单","id":"553","sourceUrl":"https://www.bilibili.com/video/BV1xxx553"},{"name":"水果沙拉","category":"水果","ingredients":["苹果","香蕉","草莓","酸奶"],"steps":["苹果、香蕉、草莓洗净切块","放入碗中，倒入酸奶","轻轻拌匀即可享用"],"time":10,"difficulty":"简单","id":"554","sourceUrl":"https://www.bilibili.com/video/BV1xxx801"},{"name":"酸奶水果捞","category":"水果","ingredients":["芒果","火龙果","猕猴桃","酸奶"],"steps":["芒果、火龙果、猕猴桃去皮切块","装入碗中，淋上酸奶","搅拌均匀即可"],"time":10,"difficulty":"简单","id":"555","sourceUrl":"https://www.bilibili.com/video/BV1xxx802"},{"name":"冰糖雪梨","category":"水果","ingredients":["雪梨","冰糖"],"steps":["雪梨洗净去核切块","放入锅中加冰糖和适量水","小火炖煮30分钟即可"],"time":40,"difficulty":"简单","id":"556","sourceUrl":"https://www.bilibili.com/video/BV1xxx803"},{"name":"简易苹果派","category":"水果","ingredients":["苹果","鸡蛋","面粉"],"steps":["苹果去皮切薄片","鸡蛋打散，与面粉调成面糊","平底锅刷油，铺上苹果片倒入面糊","小火煎至两面金黄即可"],"time":30,"difficulty":"中等","id":"557","sourceUrl":"https://www.bilibili.com/video/BV1xxx804"}];
+
+    const STORAGE_KEY = 'fridge-ai-items';
+    const CATEGORIES = ['肉类','海鲜','蛋奶','蔬菜','菌菇','主食','水果','调料','干货/其他'];
+    const CATEGORY_EMOJI = { '肉类':'🥩','海鲜':'🦐','蛋奶':'🥚','蔬菜':'🥬','菌菇':'🍄','主食':'🍚','水果':'🍎','调料':'🧂','干货/其他':'📦' };
+    const RECIPE_CATEGORIES = Array.from(new Set(RECIPES.map(r => r.category)));
+
+    let items = loadItems();
+    let view = 'home';
+    let currentRecipe = null;
+
+    function loadItems() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const map = new Map(parsed.map(i => [i.id, i]));
+          return INGREDIENTS.map(ing => {
+            const ex = map.get(ing.id);
+            return ex ? { ...ing, quantity: ex.quantity, checked: ex.checked } : { ...ing, quantity: ing.defaultQuantity, checked: false };
+          });
+        }
+      } catch (e) {}
+      return INGREDIENTS.map(ing => ({ ...ing, quantity: ing.defaultQuantity, checked: false }));
+    }
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    const RATINGS_KEY = 'fridge-ai-ratings';
+    const FAVORITES_KEY = 'fridge-ai-favorites';
+    let ratings = loadRatings();
+    let favorites = loadFavorites();
+
+    function loadRatings() {
+      try { return JSON.parse(localStorage.getItem(RATINGS_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function saveRatings() {
+      localStorage.setItem(RATINGS_KEY, JSON.stringify(ratings));
+    }
+    function loadFavorites() {
+      try { return new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY)) || []); }
+      catch (e) { return new Set(); }
+    }
+    function saveFavorites() {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
+    }
+
+    function rateRecipe(id, stars) {
+      ratings[id] = stars;
+      if (stars >= 4) favorites.add(id);
+      else favorites.delete(id);
+      saveRatings();
+      saveFavorites();
+      render();
+    }
+
+    function starRating(recipeId, current = 0) {
+      return `<div class="star-rating" onclick="event.stopPropagation()">
+        ${[1,2,3,4,5].map(s => `
+          <button class="star-btn ${s <= current ? 'filled' : 'empty'}" onclick="event.stopPropagation();rateRecipe('${recipeId}', ${s});" aria-label="${s}星">
+            ${icon(s <= current ? 'starFill' : 'star')}
+          </button>
+        `).join('')}
+      </div>`;
+    }
+
+    function matchForRecipe(recipe) {
+      const selected = new Set(items.filter(i => i.checked && i.quantity > 0).map(i => i.name));
+      const matched = recipe.ingredients.filter(ing => selected.has(ing));
+      const missing = recipe.ingredients.filter(ing => !selected.has(ing));
+      const matchRate = recipe.ingredients.length ? Math.round((matched.length / recipe.ingredients.length) * 100) : 0;
+      return { recipe, matchRate, matchedIngredients: matched, missingIngredients: missing, rating: ratings[recipe.id] || 0 };
+    }
+
+    function deleteIngredient(id) {
+      if (!confirm('确定删除该食材？')) return;
+      items = items.filter(i => i.id !== id);
+      saveItems();
+      render();
+    }
+
+    function setFridgeCategory(cat) {
+      fridgeCategory = cat;
+      const bar = document.querySelector('.category-bar');
+      if (bar) {
+        Array.from(bar.children).forEach(btn => {
+          btn.classList.toggle('active', btn.textContent === cat);
+        });
+      }
+      renderFridgeList();
+    }
+
+    function setView(v, recipe = null) {
+      view = v;
+      currentRecipe = recipe;
+      completedSteps.clear();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleCheck(id) {
+      items = items.map(i => i.id === id ? { ...i, checked: !i.checked } : i);
+      saveItems();
+      render();
+    }
+
+    function updateQuantity(id, delta) {
+      items = items.map(i => i.id === id ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i);
+      saveItems();
+      render();
+    }
+
+    function matchRecipes() {
+      const selected = new Set(items.filter(i => i.checked && i.quantity > 0).map(i => i.name));
+      return RECIPES.map(r => {
+        const matched = r.ingredients.filter(ing => selected.has(ing));
+        const missing = r.ingredients.filter(ing => !selected.has(ing));
+        const matchRate = r.ingredients.length ? Math.round((matched.length / r.ingredients.length) * 100) : 0;
+        return { recipe: r, matchRate, matchedIngredients: matched, missingIngredients: missing, rating: ratings[r.id] || 0 };
+      }).filter(m => m.matchRate > 0).sort((a, b) => b.matchRate - a.matchRate || a.recipe.ingredients.length - b.recipe.ingredients.length);
+    }
+
+    const ICONS = {
+      chef: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></svg>',
+      home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      fridge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M10 3v18"/><path d="M14 9v2"/></svg>',
+      recommend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+      arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
+      search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+      plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+      minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>',
+      utensils: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+      refrigerator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M10 3v18"/><path d="M14 9v2"/></svg>',
+      x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+      rotate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      circle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
+      star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+      starFill: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+      heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+      trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+      circleCheck: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4" fill="none"/></svg>',
+      filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+      sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>',
+      flame: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>'
+    };
+
+    function icon(name) {
+      return `<span class="icon">${ICONS[name] || ''}</span>`;
+    }
+
+    function header() {
+      return `
+        <header>
+          <div class="header-inner">
+            <button class="logo" onclick="setView('home')">
+              <div class="logo-icon">${icon('chef')}</div>
+              <span>冰箱管家 AI</span>
+            </button>
+          </div>
+        </header>
+      `;
+    }
+
+    function tabBar() {
+      const nav = [
+        { view: 'home', label: '首页', icon: 'home' },
+        { view: 'fridge', label: '冰箱', icon: 'fridge' },
+        { view: 'recommendations', label: '推荐', icon: 'recommend' },
+        { view: 'favorites', label: '收藏', icon: 'heart' },
+      ];
+      return `
+        <nav class="tab-bar">
+          <div class="tab-bar-inner">
+            ${nav.map(n => `
+              <button class="${view === n.view || (view === 'cooking' && n.view === 'recommendations') ? 'active' : ''}" onclick="setView('${n.view}')">
+                ${icon(n.icon)}
+                <span>${n.label}</span>
+              </button>
+            `).join('')}
+          </div>
+        </nav>
+      `;
+    }
+
+    function homeView() {
+      const checked = items.filter(i => i.checked && i.quantity > 0);
+      const display = checked.slice(0, 6);
+      return `
+        <main class="view" style="justify-content:center;align-items:center;">
+          <div class="text-center" style="margin-bottom:var(--space-lg);">
+            <div class="hero-icon">${icon('chef')}</div>
+            <h1>冰箱管家 AI</h1>
+            <p class="lead">打开冰箱，选择食材，马上知道今天吃什么。</p>
+          </div>
+
+          <div class="card w-full" style="margin-bottom:var(--space-lg);">
+            <div class="section-title">
+              <h2 style="font-size:var(--text-xl);margin:0;">${icon('sparkles')} 我的冰箱</h2>
+              <button class="btn btn-ghost btn-sm" onclick="setView('fridge')">管理食材</button>
+            </div>
+            ${checked.length ? `
+              <div class="grid-3">
+                ${display.map(i => `
+                  <div class="ingredient-chip">
+                    <span class="truncate">${i.name}</span>
+                    <small>×${i.quantity}${i.unit}</small>
+                  </div>
+                `).join('')}
+                ${checked.length > 6 ? `<div class="ingredient-chip" style="justify-content:center;color:#9ca3af;">+${checked.length - 6} 种食材</div>` : ''}
+              </div>
+            ` : `
+              <div class="empty-state" onclick="setView('fridge')">
+                <div style="margin-bottom:var(--space-sm);">${icon('refrigerator')}</div>
+                <p>冰箱还是空的，先去添加一些食材吧</p>
+              </div>
+            `}
+          </div>
+
+          <button class="btn btn-primary" onclick="setView('recommendations')" ${checked.length ? '' : 'disabled'}>
+            今天吃什么？ ${icon('arrowRight')}
+          </button>
+
+          <div class="mt-2 text-sm text-muted" style="display:flex;align-items:center;gap:var(--space-xs);">
+            ${icon('utensils')}
+            <span>已收录 ${RECIPES.length} 道中国菜谱</span>
+          </div>
+        </main>
+      `;
+    }
+
+    let fridgeSearch = '';
+    let fridgeCategory = '全部';
+    let addModalOpen = false;
+
+    function fridgeView() {
+      const checkedCount = items.filter(i => i.checked && i.quantity > 0).length;
+
+      const categoryButtons = ['全部', ...CATEGORIES].map(cat => `
+        <button type="button" class="${fridgeCategory === cat ? 'active' : ''}" onclick="setFridgeCategory('${cat}');">${cat}</button>
+      `).join('');
+
+      return `
+        <main class="view pb-footer">
+          <div class="section-title">
+            <div>
+              <h2>我的冰箱</h2>
+              <p class="text-sm text-muted">勾选今天想用的食材，系统会自动推荐菜谱</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addModalOpen=true;render();">
+              ${icon('plus')} 添加
+            </button>
+          </div>
+
+          <div class="search-wrap">
+            ${icon('search')}
+            <input type="text" id="fridge-search" placeholder="搜索食材..." value="${fridgeSearch}" oninput="fridgeSearch=this.value;renderFridgeList();" />
+          </div>
+
+          <div class="category-bar">${categoryButtons}</div>
+
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-muted">共 <strong id="fridge-count">0</strong> 种食材</p>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm" onclick="selectAllVisible()">全选</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearVisible()">清空</button>
+            </div>
+          </div>
+
+          <div id="fridge-list"></div>
+
+          <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+              <div class="flex items-center gap-2">
+                <div class="logo-icon" style="width:2.5rem;height:2.5rem;">${icon('chef')}</div>
+                <div>
+                  <p class="text-sm text-muted">已选择</p>
+                  <p class="font-bold"><span style="color:var(--primary);">${checkedCount}</span> 种食材</p>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="setView('recommendations')" ${checkedCount ? '' : 'disabled'}>
+                生成菜单 ${icon('arrowRight')}
+              </button>
+            </div>
+          </div>
+        </main>
+        ${addModalOpen ? addIngredientModal() : ''}
+      `;
+    }
+
+    function renderFridgeList() {
+      const filtered = items.filter(i => {
+        const s = fridgeSearch.toLowerCase();
+        return i.name.toLowerCase().includes(s) && (fridgeCategory === '全部' || i.category === fridgeCategory);
+      });
+
+      const countEl = document.getElementById('fridge-count');
+      if (countEl) countEl.textContent = filtered.length;
+
+      const container = document.getElementById('fridge-list');
+      if (!container) return;
+
+      container.innerHTML = filtered.length ? `
+        <div class="ingredient-list">
+          ${filtered.map(i => `
+            <div class="ingredient-card ${i.checked ? 'checked' : ''}" onclick="toggleCheck('${i.id}')">
+              <div class="left">
+                <div class="checkbox">${i.checked ? icon('check') : ''}</div>
+                <span class="emoji">${CATEGORY_EMOJI[i.category] || '🍽️'}</span>
+                <div class="truncate">
+                  <div class="name">${i.name}</div>
+                  <div class="meta">${i.category}</div>
+                </div>
+              </div>
+              <div class="qty-controls" onclick="event.stopPropagation()">
+                <button type="button" onclick="updateQuantity('${i.id}', -1)" aria-label="减少">${icon('minus')}</button>
+                <span>${i.quantity}${i.unit}</span>
+                <button type="button" onclick="updateQuantity('${i.id}', 1)" aria-label="增加">${icon('plus')}</button>
+                <button type="button" class="delete-btn" onclick="deleteIngredient('${i.id}')" aria-label="删除">${icon('trash')}</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `
+        <div class="empty-state">
+          ${fridgeSearch || fridgeCategory !== '全部' ? '没有匹配的食材' : '冰箱是空的，点击右上角添加食材'}
+        </div>
+      `;
+    }
+
+    function selectAllVisible() {
+      const visibleIds = items.filter(i => (fridgeCategory === '全部' || i.category === fridgeCategory) && i.name.toLowerCase().includes(fridgeSearch.toLowerCase())).map(i => i.id);
+      items = items.map(i => visibleIds.includes(i.id) ? { ...i, checked: true } : i);
+      saveItems();
+      render();
+    }
+
+    function clearVisible() {
+      const visibleIds = items.filter(i => (fridgeCategory === '全部' || i.category === fridgeCategory) && i.name.toLowerCase().includes(fridgeSearch.toLowerCase())).map(i => i.id);
+      items = items.map(i => visibleIds.includes(i.id) ? { ...i, checked: false } : i);
+      saveItems();
+      render();
+    }
+
+    function addIngredientModal() {
+      const existingIds = new Set(items.filter(i => i.checked && i.quantity > 0).map(i => i.id));
+      const available = INGREDIENTS.filter(i => !existingIds.has(i.id));
+      const groups = CATEGORIES.map(cat => ({
+        cat,
+        ingredients: available.filter(i => i.category === cat)
+      })).filter(g => g.ingredients.length);
+
+      return `
+        <div class="modal-overlay" onclick="if(event.target===this){addModalOpen=false;render();}">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header flex items-center justify-between">
+              <h3>添加食材</h3>
+              <button class="btn-icon" onclick="addModalOpen=false;render();">${icon('x')}</button>
+            </div>
+            <div class="modal-body">
+              ${groups.length === 0 ? '<p class="text-muted text-center">所有预设食材都已添加</p>' : groups.map(g => `
+                <div class="mb-2">
+                  <h4 class="text-sm text-muted mb-2">${g.cat}</h4>
+                  <div class="add-grid">
+                    ${g.ingredients.map(ing => `
+                      <button class="add-btn" onclick="addIngredientById('${ing.id}')">
+                        ${icon('plus')} ${ing.name}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function addIngredientById(id) {
+      items = items.map(i => i.id === id ? { ...i, checked: true, quantity: i.quantity || i.defaultQuantity } : i);
+      saveItems();
+      render();
+    }
+
+    let recSort = 'match';
+    let recFilter = '全部';
+
+    function recommendationsView() {
+      const matches = matchRecipes();
+      const filtered = recFilter === '全部' ? matches : matches.filter(m => m.recipe.category === recFilter);
+      const sorted = [...filtered].sort((a, b) => {
+        if (recSort === 'match') return b.matchRate - a.matchRate || a.recipe.ingredients.length - b.recipe.ingredients.length;
+        if (recSort === 'rating') return (b.rating || 0) - (a.rating || 0) || b.matchRate - a.matchRate;
+        if (recSort === 'time') return a.recipe.time - b.recipe.time;
+        const d = { '简单': 1, '中等': 2, '困难': 3 };
+        return d[a.recipe.difficulty] - d[b.recipe.difficulty];
+      });
+      const perfect = matches.filter(m => m.matchRate === 100);
+
+      return `
+        <main class="view pb-footer">
+          <h2 class="mb-2">推荐菜单</h2>
+          <p class="text-muted text-sm mb-3">根据你选择的 <strong>${items.filter(i=>i.checked&&i.quantity>0).length}</strong> 种食材匹配</p>
+
+          <div class="select-bar">
+            <div class="flex items-center gap-2">
+              <span class="tag primary">可制作 ${sorted.length} 道</span>
+              ${perfect.length ? `<span class="tag success">食材齐全 ${perfect.length} 道</span>` : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              ${icon('sliders')}
+              <select onchange="recSort=this.value;render();">
+                <option value="match" ${recSort==='match'?'selected':''}>匹配度</option>
+                <option value="rating" ${recSort==='rating'?'selected':''}>我的评分</option>
+                <option value="time" ${recSort==='time'?'selected':''}>用时</option>
+                <option value="difficulty" ${recSort==='difficulty'?'selected':''}>难度</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="category-bar">
+            ${icon('filter')}
+            ${['全部', ...RECIPE_CATEGORIES].map(cat => `
+              <button class="${recFilter === cat ? 'active' : ''}" onclick="recFilter='${cat}';render();">${cat}</button>
+            `).join('')}
+          </div>
+
+          <div class="recipe-grid">
+            ${sorted.map(m => recipeCard(m)).join('')}
+          </div>
+        </main>
+      `;
+    }
+
+    function recipeCard(m) {
+      return `
+        <div class="recipe-card" onclick="setView('cooking', RECIPES.find(r=>r.id==='${m.recipe.id}'))">
+          <div class="top">
+            <div>
+              <h3>${m.recipe.name}</h3>
+              <div class="tags">
+                <span class="tag">${m.recipe.category}</span>
+                <span class="tag">${m.recipe.difficulty}</span>
+                <span class="tag">${m.recipe.time} 分钟</span>
+              </div>
+            </div>
+            <span class="tag ${m.matchRate === 100 ? 'success' : 'warn'}">${m.matchRate}%</span>
+          </div>
+          <div class="match-bar"><div class="fill" style="width:${m.matchRate}%"></div></div>
+          ${starRating(m.recipe.id, m.rating)}
+          <p class="text-sm text-muted mt-1">
+            已备：${m.matchedIngredients.join('、') || '无'}
+            ${m.missingIngredients.length ? `<br>缺：${m.missingIngredients.join('、')}` : ''}
+          </p>
+        </div>
+      `;
+    }
+
+    function favoritesView() {
+      const favRecipes = RECIPES.filter(r => favorites.has(String(r.id))).map(r => matchForRecipe(r));
+      favRecipes.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      return `
+        <main class="view pb-footer">
+          <h2 class="mb-2">收藏库</h2>
+          <p class="text-muted text-sm mb-3">你偏爱的 <strong>${favRecipes.length}</strong> 道菜</p>
+          ${favRecipes.length ? `
+            <div class="recipe-grid">
+              ${favRecipes.map(m => recipeCard(m)).join('')}
+            </div>
+          ` : `
+            <div class="empty-state">
+              <div style="margin-bottom:var(--space-sm);">${icon('heart')}</div>
+              <p>在推荐页给喜欢的菜品打 4 星以上，会自动收藏到这里</p>
+              <button type="button" class="btn btn-primary btn-sm" style="margin-top:var(--space-sm);" onclick="setView('recommendations')">去评分</button>
+            </div>
+          `}
+        </main>
+      `;
+    }
+
+    let completedSteps = new Set();
+
+    function cookingView() {
+      if (!currentRecipe) return setView('recommendations');
+      const progress = Math.round((completedSteps.size / currentRecipe.steps.length) * 100);
+      return `
+        <main class="view pb-footer">
+          <button class="btn btn-ghost btn-sm mb-2" onclick="setView('recommendations')">← 返回推荐</button>
+          <h2 class="mb-2">${currentRecipe.name}</h2>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="tag">${currentRecipe.category}</span>
+            <span class="tag">${currentRecipe.difficulty}</span>
+            <span class="tag">${currentRecipe.time} 分钟</span>
+          </div>
+          <div class="mb-3">${starRating(String(currentRecipe.id), ratings[currentRecipe.id] || 0)}</div>
+
+          <div class="card mb-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-muted">制作进度</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold" style="color:var(--primary);font-size:var(--text-xl);">${progress}%</span>
+                ${progress > 0 ? `<button class="btn btn-ghost btn-sm" onclick="completedSteps.clear();render();">${icon('rotate')}</button>` : ''}
+              </div>
+            </div>
+            <div class="progress"><div class="fill" style="width:${progress}%"></div></div>
+          </div>
+
+          <div>
+            ${currentRecipe.steps.map((step, idx) => `
+              <div class="step-card ${completedSteps.has(idx)?'done':''}" onclick="toggleStep(${idx})">
+                <div class="step-num">${completedSteps.has(idx)?icon('check'):idx+1}</div>
+                <div class="step-body">
+                  <div class="label">Step ${idx+1}</div>
+                  <p>${step}</p>
+                </div>
+                <div style="padding-top:.25rem;">${completedSteps.has(idx)?icon('circleCheck'):icon('circle')}</div>
+              </div>
+            `).join('')}
+          </div>
+        </main>
+      `;
+    }
+
+    function toggleStep(idx) {
+      if (completedSteps.has(idx)) completedSteps.delete(idx);
+      else completedSteps.add(idx);
+      render();
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      let content = header();
+      if (view === 'home') content += homeView();
+      else if (view === 'fridge') content += fridgeView();
+      else if (view === 'recommendations') content += recommendationsView();
+      else if (view === 'favorites') content += favoritesView();
+      else if (view === 'cooking') content += cookingView();
+      content += tabBar();
+      app.innerHTML = content;
+      if (view === 'fridge') renderFridgeList();
+    }
+
+    render();
+  </script>
+</body>
+</html>
